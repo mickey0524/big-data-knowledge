@@ -24,3 +24,12 @@
 		* MapReduce
 		* Spark
 		* Flink
+
+* 数据仓库(DW/Data Warehouse)分层原则(每家公司都有自己的规范)
+
+	* dim：维度层，一般用于存储属性信息，多用于联表查询
+	* dwd/ods(data warehouse detail)：事实明细层，存储事实表的明细粒度数据，比较底层的数据，源数据清洗得来，例如埋点后捞出来的数据
+	* dwa(data warehouse aggregation)：事实聚合层，存储事实表聚合粒度数据，按需求联合查询得到的聚合表
+	* app(application)：应用层，存储直接供给应用的数据
+
+	![dw架构图](/imgs/dw.png)
