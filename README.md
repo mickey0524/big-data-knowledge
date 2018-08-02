@@ -33,3 +33,12 @@
 	* app(application)：应用层，存储直接供给应用的数据
 
 	![dw架构图](/imgs/dw.png)
+
+* hive的join操作不支持like模糊匹配，如果非要使用like，需要使用笛卡尔积，这个效率太低，不如放到内存中匹配，下面是笛卡尔积的写法
+
+    ```sql
+    SELECT table1.brand, SUM(table2.sold) 
+    FROM table1, table2
+    WHERE table2.product LIKE concat('%', table1.brand, '%') 
+    GROUP BY table1.brand;
+    ```
