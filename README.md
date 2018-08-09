@@ -1,6 +1,13 @@
 # big-data-knowledge
 📖大数据相关知识集锦
 
+* [hdfs](#hdfs)
+* [yarn](#yarn)
+* [hive](#hive)
+* [mapreduce](#mapreduce)
+
+<h3 id="hdfs">hdfs</h3>
+
 * HDFS简介
 
 	HDFS是Hadoop Distributed File System的简写
@@ -11,6 +18,8 @@
 	* 不适合实时访问，具有高延迟性，例如新建了一张hive表，需要过一会才能看到
 	* [Hadoop HDFS 教程（一）介绍](https://www.jianshu.com/p/8969eb90a59d)
 	* [Hadoop HDFS（二）结构解析和名词解释](https://www.jianshu.com/p/86a70ac1f5f9)
+
+<h3 id="yarn">yarn</h3>
 
 * yarn简介
 
@@ -25,6 +34,8 @@
 		* Spark
 		* Flink
 
+<h3 id="hive">hive</h3>
+
 * 数据仓库(DW/Data Warehouse)分层原则(每家公司都有自己的规范)
 
 	* dim：维度层，一般用于存储属性信息，多用于联表查询
@@ -34,7 +45,7 @@
 
 	![dw架构图](/imgs/dw.png)
 
-* hive的join操作不支持like模糊匹配，如果非要使用like，需要使用笛卡尔积，这个效率太低，不如放到内存中匹配，下面是笛卡尔积的写法
+* hive的join操作，只支持等值匹配，不支持like模糊匹配，如果非要使用like，需要使用笛卡尔积，这个效率太低，不如放到内存中匹配，下面是笛卡尔积的写法
 
     ```sql
     SELECT table1.brand, SUM(table2.sold) 
@@ -42,6 +53,91 @@
     WHERE table2.product LIKE concat('%', table1.brand, '%') 
     GROUP BY table1.brand;
     ```
+
+* hive表分为内部表和外部表，内部表drop的时候会将hdfs上的数据**一起删除**，外部表drop的时候**不会删除**hdfs上的数据
+
+* 创建hive表语句栗子
+
+	```sql
+	create external table table_name (
+		uid bigint comment '用户id',
+		name string
+	) comment '用户表'
+	PARTITIONED BY (`date` string)
+	ROW FORMAT DELIMITED
+		FIELDS TERMINATED BY `\t` // 指定每行中字段分隔符为\t
+		LINES TERMINATED BY `\n` // 指定行分隔符
+		COLLECTION ITEMS TERMINATED BY `,` // 指定集合中元素之间的分隔符
+		MAP KEYS TERMINATED BY `:` // 指定数据中Map类型的Key与Value之间的分隔符
+	LOCATION
+		'hdfs://XXX'
+	```
+	
+	external指代这张表是否为外部表
+
+* 向hive表中加载数据
+
+	* 建表时直接指定
+
+		如果你的数据已经在hdfs上存在，已经为结构化的数据，并且数据所在的hdfs路径不需要维护，那么直接在create的时候指定location字段为hdfs路径即可
+	
+	* 从本地文件系统或者hdfs的一个目录中加载，使用 LOAD DATA命令加载数据
+
+		```sql
+		load data local inpath XXX overwrite into table partition(day = '20180808') # load 本地文件
+		
+		load data inpath XXX overwrite into table partition(day = '20180808') # load hdfs文件
+		```
+		
+	* 从一个select查询中load 数据
+
+		```sql
+		insert overwrite table table_name partition(day = '20180808')
+		
+		select
+			*
+		from
+			table
+		where
+			date = '20180808'
+		```
+
+* hive中join的原理和机制
+
+	笼统的说，hive中的join可以分为common join(reduce阶段完成join)和map join(map阶段完成join)
+	
+	* map阶段
+	
+		读取源表的数据，map输出时候以join on条件中的列为key，如果Join有多个关联键，则以这些关联键的组合作为key。map输出的value为join之后所关心的(select或者where中需要用到的)列，同时在value中还会包含表的Tag信息，用于标明此value对应哪个表；
+		
+	* shuffle阶段
+
+		根据key的值进行hash,并将key/value按照hash值推送至不同的reduce中，这样确保两个表中相同的key位于同一个reduce中
+		
+	* reduce阶段
+		
+		根据key数值完成join操作，期间通过tag来识别不同表中的数据
+		
+	* 例子
+
+		```sql
+		SELECT 
+			a.id,
+			a.dept,
+			b.age 
+		FROM
+			a join b 
+		ON
+			a.id = b.id;
+		```
+		
+		![hive-join](/imgs/hive-join.png)
+
+* hive sql的优化
+
+	[Hive SQL的优化](http://lxw1234.com/archives/2015/06/317.htm)
+
+<h3 id="mapreduce">mapreduce</h3>
 
 * MapReduce简介
     
