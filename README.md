@@ -137,6 +137,10 @@
 
 	[Hive SQL的优化](http://lxw1234.com/archives/2015/06/317.htm)
 
+* hive函数总结
+
+    [hive函数总结](https://www.cnblogs.com/yejibigdata/p/6380744.html)
+
 <h3 id="mapreduce">mapreduce</h3>
 
 * MapReduce简介
