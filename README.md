@@ -140,6 +140,12 @@
 * hive函数总结
 
     [hive函数总结](https://www.cnblogs.com/yejibigdata/p/6380744.html)
+    
+* hive的text存储格式和parquet存储格式
+
+	text是行式存储，多用于手动load数据进入hive表，例如`pandas.Dateframe.tocsv()`
+	
+	parquet是列式存储，在一列有很多相同数值(例如NULL和常数)这样的时候，稀疏存储能省很多空间，同时列式存储在select的时候不用遍历每行，直接遍历列就行
 
 <h3 id="mapreduce">mapreduce</h3>
 
