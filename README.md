@@ -173,3 +173,40 @@
 
     [在mr streaming中获取文件名](https://blog.csdn.net/bitcarmanlee/article/details/51735053)
 
+* Hadoop Streaming
+
+    ![Hadoop Streaming 计算过程](./imgs/hadoop_streaming.jpg)
+    
+    python编写mapreduce就是使用了Hadoop Streaming的特点
+    
+    * Streaming的优点：
+    	* 开发效率高
+    		* 只需按照一定的格式从标准输入读取数据、向标准输出写数据就行
+    		* 容易单机调试: cat input | mapper | sort | reducer > output
+    	* 程序运行效率高
+			* 对于CPU密集的计算，有些语言如C/C++编写的程序可能比用Java效率高一些
+		* 便于平台进行资源控制
+			* Streaming框架中通过limit等方式可以灵活地限制应用程序使用的内存资源
+	* Streaming的局限
+		* Streaming默认只能处理文本数据
+		* 两次数据拷贝和解析（分割），带来一定的开销
+	
+	* Streaming的开发要点：
+		* input：指定输入文件的HDFS路径，支持使用*通配符和指定多个文件或目录，可多次使用
+		* output：指定输出文件的HDFS路径，路径必须不存在，且具备创建该目录的权限，只能使用一次
+		* mapper：用户自己写的mapper程序
+		* reduer：用户自己写的reduce程序
+		* file：打包文件到提交的作业中
+			* map和reduce的执行文件，如run.sh
+			* map和reduce要用输入的文件，如配置文件
+			* 还有-cacheFile, -cacheArchive分别用于向计算节点分发HDFS文件和HDFS压缩文件
+		* jobconf：提交作业的一些配置属性，常见配置：
+			* mapred.map.tasks：map task数目
+			* mapred.reduce.tasks：reduce task数目
+			* stream.num.map.output.key.fields：指定map task输出记录中key所占的域数目
+			* num.key.fields.for.partition：指定对key分出来的前几部分做partition，而非整个key
+			* mapred.compress.map.output：map的输出是否压缩
+			* mapred.map.output.compression.codec：map的输出压缩方式
+			* mapred.output.compress：reduce的输出是否压缩
+			* mapred.output.compression.codec：reduce的输出压缩方式
+    		
