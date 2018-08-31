@@ -19,6 +19,15 @@
 	* [Hadoop HDFS 教程（一）介绍](https://www.jianshu.com/p/8969eb90a59d)
 	* [Hadoop HDFS（二）结构解析和名词解释](https://www.jianshu.com/p/86a70ac1f5f9)
 
+* HDFS存在一个单点问题，即全Hadoop系统只有一个NameNode，如果NameNode挂了怎么办
+
+    * 将hadoop元数据写入到本地文件系统的同时，再实时同步到一个远程挂载的网络文件系统
+    * 运行一个secondaryNameNode
+        * 元数据持久化到磁盘，在fsimage中存放元信息，在edits中存放对元信息的操作的文件
+        * 定时到NameNode中去获取edit logs，并更新到fsimage
+        * 一旦它有了新的fsimage文件，它将其拷贝回NameNode中
+        * NameNode在下次重启时会使用这个新的fsimage文件，从而减少重启的时间
+
 <h3 id="yarn">yarn</h3>
 
 * yarn简介
