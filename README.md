@@ -28,6 +28,10 @@
         * 一旦它有了新的fsimage文件，它将其拷贝回NameNode中
         * NameNode在下次重启时会使用这个新的fsimage文件，从而减少重启的时间
 
+* HDFS中的块为什么这么大？
+
+    HDFS的块比磁盘的块大，其目的是为了最小化寻址开销。如果块足够大，从磁盘传输数据的时间会明显大于定位这个块开始位置所需的时间。因而，传输一个由多个块组成的大文件的时间取决于磁盘传输速率
+
 <h3 id="yarn">yarn</h3>
 
 * yarn简介
@@ -219,3 +223,4 @@
 			* mapred.output.compress：reduce的输出是否压缩
 			* mapred.output.compression.codec：reduce的输出压缩方式
     		
+* mapreduce中的combine阶段，众所周知，mapreduce中有map和reduce两个阶段，其实还有一个用户可以选择的combine阶段，对map出来的数据进行预聚合，减少传递给reduce worker的数据量，加快处理速度，例如，求出某个key的最大值，就可以在map worker中取对应的key的最大值，不用将所有的数据都丢给reduce worker
