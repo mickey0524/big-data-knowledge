@@ -254,3 +254,5 @@
 			* mapred.output.compression.codec：reduce的输出压缩方式
     		
 * mapreduce中的combine阶段，众所周知，mapreduce中有map和reduce两个阶段，其实还有一个用户可以选择的combine阶段，对map出来的数据进行预聚合，减少传递给reduce worker的数据量，加快处理速度，例如，求出某个key的最大值，就可以在map worker中取对应的key的最大值，不用将所有的数据都丢给reduce worker
+
+    [combine阶段发生在什么时候](https://stackoverflow.com/questions/35195101/which-runs-first-combiner-or-partitioner-in-a-mapreduce-job)
