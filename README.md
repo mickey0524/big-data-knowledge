@@ -32,6 +32,16 @@
 
     HDFS的块比磁盘的块大，其目的是为了最小化寻址开销。如果块足够大，从磁盘传输数据的时间会明显大于定位这个块开始位置所需的时间。因而，传输一个由多个块组成的大文件的时间取决于磁盘传输速率
 
+* HDFS的读流程和写流程
+
+    读过程
+
+    ![read-hdfs](./imgs/read-hdfs.jpg)
+
+    写过程
+
+    ![write-hdfs](./imgs/write-hdfs.jpg)
+
 <h3 id="yarn">yarn</h3>
 
 * yarn简介
@@ -47,6 +57,26 @@
 		* Spark
 		* Flink
 
+* YARN是hadoop的集群资源管理系统，YARN被引入Hadoop 2，最初是为了改善MapReduce的实现，但它具有足够的通用性，也可以用于其他的分布式计算模式，例如Spark，那么MapReduce1和YARN的区别是啥呢？
+
+    MapReduce1中，有两类守护进程控制者作业的执行过程：一个`jobtracker`及一个或多个`tasktracker`。jobtracker通过调度tasktracker上运行的任务来协调所有运行在系统上的作业。tasktracker在运行任务的同时将运行进度报告发送给jobtracker，jobtracker由此记录每项作业任务的整体进度情况。如果其中一个任务失败，jobtracker可以在另一个tasktracker节点上重新调度该任务。
+
+    MapReduce1中，jobtracker同时负责作业调度(将任务与tasktracker匹配)和任务进度监控(跟踪任务、重启失败或迟缓的任务；记录任务流水，如维护计数器的计数)。相比之下，YARN中，这些职责是由不同的实体担负的：资源管理器和application master(每个 MapReduce 作业一个)。jobtracker也负责存储已完成作业的作业历史。在YARN中，与之等价的角色是时间轴服务器，它主要用于存储应用历史。
+
+    YARN中与tasktracker等价的角色是节点管理器。
+    
+    | MapReduce1 | YARN |
+    | ---------- | ---- |
+    | Jobtracker | 资源管理器、application master、时间轴服务器|
+    | Tasktracker| 节点管理器 |
+    | Slot | 容器 |
+    
+* YARN中存在三种调度方法
+
+	* FIFO
+	* 容器调度器
+	* 公平调度器
+
 <h3 id="hive">hive</h3>
 
 * 数据仓库(DW/Data Warehouse)分层原则(每家公司都有自己的规范)
@@ -56,7 +86,7 @@
 	* dwa(data warehouse aggregation)：事实聚合层，存储事实表聚合粒度数据，按需求联合查询得到的聚合表
 	* app(application)：应用层，存储直接供给应用的数据
 
-	![dw架构图](/imgs/dw.png)
+	![dw架构图](./imgs/dw.png)
 
 * hive的join操作，只支持等值匹配，不支持like模糊匹配，如果非要使用like，需要使用笛卡尔积，这个效率太低，不如放到内存中匹配，下面是笛卡尔积的写法
 
@@ -144,7 +174,7 @@
 			a.id = b.id;
 		```
 		
-		![hive-join](/imgs/hive-join.png)
+		![hive-join](./imgs/hive-join.png)
 
 * hive sql的优化
 
@@ -166,7 +196,7 @@
     
     MapReduce是一个编程模型，也是一个处理和生成超大数据集的算法模型的相关实现。用户首先创建一个Map函数处理一个基于k/v pair的数据集合，输出中间的基于k/v pair的数据集合；然后再创建一个Reduce函数用来合并所有的具有相同中间key值的中间value值，MapReduce架构的程序能够在大量的普通配置的计算机上实现并行化处理，可以用于处理TB级别的数据
 
-    ![MapReduce](/imgs/mapreduce.png)
+    ![MapReduce](./imgs/mapreduce.png)
 
 	* 用户程序首先调用的MapReduce库将输入文件分成M个数据片段，每个数据片段的大小从16MB到512MB(可以通过可选的参数来控制每个数据片段的大小)。然后用户程序在机群中创建大量的程序副本。
 	* 这些程序副本中的有一个特殊的程序 - master。副本中其它的程序都是worker程序，由master分配任务。有M个Map任务和R个Reduce任务将被分配，master将一个Map任务或Reduce任务分配给一个空闲的worker。
