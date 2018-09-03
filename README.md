@@ -42,6 +42,8 @@
 
     ![write-hdfs](./imgs/write-hdfs.jpg)
 
+* HDFS通过CRC校验来保证数据的正确性
+ 
 <h3 id="yarn">yarn</h3>
 
 * yarn简介
