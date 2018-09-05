@@ -191,6 +191,41 @@
 	text是行式存储，多用于手动load数据进入hive表，例如`pandas.Dateframe.tocsv()`
 	
 	parquet是列式存储，在一列有很多相同数值(例如NULL和常数)这样的时候，稀疏存储能省很多空间，同时列式存储在select的时候不用遍历每行，直接遍历列就行
+	
+* hive中的压缩设置
+
+	* hive.exec.compress.intermediate：默认该值为false，设置为true为激活中间数据压缩功能。HiveQL语句最终会被编译成Hadoop的Mapreduce job，开启Hive的中间数据压缩功能，就是在MapReduce的shuffle阶段对mapper产生的中间结果数据压缩。在这个阶段，优先选择一个低CPU开销的算法。
+	* mapred.map.output.compression.codec：该参数是具体的压缩算法的配置参数，SnappyCodec比较适合在这种场景中编解码器，该算法会带来很好的压缩性能和较低的CPU开销。
+	* hive.exec.compress.output：用户可以对最终生成的Hive表的数据通常也需要压缩。该参数控制这一功能的激活与禁用，设置为true来声明将结果文件进行压缩。
+	* mapred.output.compression.codec：将hive.exec.compress.output参数设置成true后，然后选择一个合适的编解码器，如选择SnappyCodec。
+
+		```
+		set hive.exec.compress.intermediate=true;
+		set mapred.map.output.compression.codec=org.apache.hadoop.io.compress.SnappyCodec;
+		set hive.exec.compress.output=true;
+		set mapred.output.compression.codec=org.apache.hadoop.io.compress.SnappyCodec;
+		```
+	
+* Hive中文件格式可以在`create table`的时候指明，默认是采用textfile的格式，也可以指定为orc，parquet等
+
+	```
+	create table if not exists...
+	
+	sotred as orc/parquet
+	```
+
+* hive可以通过load local data将本地文件load到hdfs上，但是parquet的文件不能这样，需要先用pandas的df.to_parquet()，才可以推上去
+
+	```
+	import pandas as pd
+	df = pd.DataFrame(data={'col1': [1, 2]})
+	df.to_parquet('df.parquet.snappy', compression='snappy')
+	pd.read_parquet('df.parquet.snappy')
+	...
+		col1
+	0	1
+	1	2
+	```
 
 <h3 id="mapreduce">mapreduce</h3>
 
