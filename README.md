@@ -44,6 +44,12 @@
 
 * HDFS通过CRC校验来保证数据的正确性
  
+* proquet列式存储
+
+    * [深入分析Parquet列式存储格式](http://www.infoq.com/cn/articles/in-depth-analysis-of-parquet-column-storage-format)
+    * [Dremel made simple with Parquet](https://blog.twitter.com/engineering/en_us/a/2013/dremel-made-simple-with-parquet.html)
+    * [Dremel: Interactive Analysis of Web-Scale Datasets](http://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/36632.pdf)
+
 <h3 id="yarn">yarn</h3>
 
 * yarn简介
@@ -214,7 +220,7 @@
 	sotred as orc/parquet
 	```
 
-* hive可以通过load local data将本地文件load到hdfs上，但是parquet的文件不能这样，需要先用pandas的df.to_parquet()，才可以推上去
+* hive可以通过load local data将本地文件load到hdfs上，但是parquet的文件不能这样，需要先用pandas的df.to\_parquet()，才可以推上去(该方法新增于0.21.0版本)
 
 	```
 	import pandas as pd
@@ -253,7 +259,7 @@
     
     * reduce端的merge不是一次性完成的，比如，如果有50个map输出，而合并因子是10（10为默认值，由mapreduce.task.io.sort.factor属性设置），合并将进行5趟，每趟将10个文件合并成一个文件，因此最后有5个中间文件，然后，将这5个文件作为reduce的输入，从而省去了一次磁盘的往返过程
 
-        [reduce-merge](./imgs/reduce-merge.jpg)
+        ![reduce-merge](./imgs/reduce-merge.jpg)
 
 * mr的inputfile可以写多个，可以在map.py中通过数据格式来区分不同的文件，也可以通过环境变量来得到hdfs上文件的绝对路径
 
