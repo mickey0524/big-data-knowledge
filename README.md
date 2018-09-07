@@ -233,6 +233,62 @@
 	1	2
 	```
 
+* hive命令后面的选项
+
+    * hive -f：使用-f选项可以运行指定文件中的命令，`hive -f script.q`指代我们运行脚本文件`script.q`
+    * hive -S：无论是在交互式还是非交互式模式下，Hive都会把操作运行时的信息打印输出到标准错误输出，使用-S可以强制不显示这些信息
+    * hive -e：使用-e选项可以在行内嵌入命令，例如`hive -e 'select * from table'`
+
+* hive中查看函数使用方法的工具函数
+
+    `describe function length`来查看length的用法
+
+* hive从0.14.0版开始允许使用`INSERT INTO TABLE...VALUES`语句来插入一小撮以文字形式指明的记录，它并不是直接插入到data file，而是将数据放入暂存目录，由hive底层的同步进程周期性拷贝过去
+
+* hive支持多表插入
+
+    ```
+    FROM source
+    INSERT OVERWRITE TABLE target1
+    select col1
+    INSERT OVERWRITE TABLE target2
+    select col2;
+    ```
+
+* hive中使用order by的时候会对数据进行全排列，同时只会使用一个reducer worker，我们可以用sort by和distribute by来进行代替，因为这个时候我们可以手动设置多个reducer worker，方法如下：
+
+    ```
+    set mapred.reduce.tasks=2;
+    ```
+
+* 和 Hadoop Streaming 类似，TRANSFORM、MAP和REDUCE子句可以在Hive中调用外部脚本或程序，如下所示:
+
+    ```
+    ADD FILE /Users/map.py;
+    
+    select
+        transform(year, temperature, quality)
+    using
+        'python map.py'
+    as
+        year, temperature
+    from
+        record
+    ```
+
+    ```
+    from (
+        from record2
+        map year, temperature, quality
+        using 'python is_good_quality.py'
+        as year, temperature)map_output
+    reduce year, temperature
+    using 'max_temperature_reduce.py'
+    as year, temperature;
+    ```
+
+    上面的`map`和`reduce`关键字都可以用`transform`来替换
+
 <h3 id="mapreduce">mapreduce</h3>
 
 * MapReduce简介
