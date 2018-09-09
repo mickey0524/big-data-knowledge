@@ -5,6 +5,8 @@
 * [yarn](#yarn)
 * [hive](#hive)
 * [mapreduce](#mapreduce)
+* [spark](#spark)
+* [hbase](#hbase)
 
 <h3 id="hdfs">hdfs</h3>
 
@@ -397,3 +399,21 @@
 
         在某些情况下，SemiJoin抽取出来的小表的key集合在内存中仍然存放不下，这时候可以使用BloomFiler以节省空间。
 BloomFilter最常见的作用是：判断某个元素是否在一个集合里面。它最重要的两个方法是：add() 和contains()。最大的特点是不会存在false negative，即：如果contains()返回false，则该元素一定不在集合中，但会存在一定的true negative，即：如果contains()返回true，则该元素可能在集合中。因而可将小表中的key保存到BloomFilter中，在map阶段过滤大表，可能有一些不在小表中的记录没有过滤掉（但是在小表中的记录一定不会过滤掉），这没关系，只不过增加了少量的网络IO而已
+
+<h3 id="spark">spark</h3>
+
+* RDD的三种生成方式
+
+    * 从内存中的对象集合生成
+    * 从本地文件或hdfs中读取出
+    * 从RDD转换而来
+
+<h3 id="hbase">hbase</h3>
+
+* hbase是一个在HDFS上开发的面向列的分布式数据库，如果需要实时地随机访问超大规模数据集，就可以使用HBase这一Hadoop应用
+
+* hbase也是一个master-slave的存储模型，它用一个master节点协调管理一个或多个regionserver从属机。hbase主控机(master)负责启动一个全新的安装，把区域分配给注册的regionserver，恢复regionserver的故障，master的负载很轻。regionsever负责零个或多个的区域管理以及响应客户端的读写请求。regionserver还负责区域的划分并通知HBase master有了新的子域
+
+    ![hbase-master-slave](./imgs/hbase-master-slave.jpg)
+
+* [HBase深入浅出](https://www.ibm.com/developerworks/cn/analytics/library/ba-cn-bigdata-hbase/index.html)
