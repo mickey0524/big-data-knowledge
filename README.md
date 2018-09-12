@@ -403,11 +403,70 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 <h3 id="spark">spark</h3>
 
+* spark-cluster的工作模式
+
+    ![spark-cluster](./imgs/spark-cluster.jpg)
+
 * RDD的三种生成方式
 
     * 从内存中的对象集合生成
     * 从本地文件或hdfs中读取出
     * 从RDD转换而来
+
+* RDD支持两种类型的操作，转化操作(transformation)和行动操作(action)，转化操作会由一个RDD生成一个新的RDD，行动操作会对RDD计算出一个结果，转化操作和行动操作的区别在于Spark计算RDD的方式不同，虽然你可以在任何时候定义新的RDD，但Spark只会惰性计算这些RDD，它们只有第一次在一个行动操作中用到时，才会真正计算
+
+* 如果在多个行动中重用同一个操作，可以使用`RDD.persist()`或`RDD.cache()`让Spark把这个RDD缓存下来，提高效率
+
+* 创建RDD最简单的方式就是把程序中一个已有的集合传给SparkContext的`parallelize()`
+
+    `lines = sc.parallelize(['a', 'b', 'c'])`
+
+* 向Spark传递函数的时候需要小心，python会在你不经意的时候把函数所在的对象也序列化传递出去，当你传递的对象是某个对象的成员，或者包含了对某个对象中一个字段的引用时(例如self.field)，Spark就会把整个对象发送到工作节点上
+
+	```python
+	class SearchFunctions(object):
+		def __init__(self, query):
+			self.query = query
+		def isMatch(self, s):
+			return self.query in s
+		def getMatchesFunctionReference(self, rdd):
+			# 问题: 在"self.isMatch"中引用了整个self
+			return rdd.filter(self.isMatch)
+		def getMatchesMemberReference(self, rdd):
+			# 问题: 在"self.query"中引用了整个self
+			return rdd.filter(lambda x: self.query in x)
+	```
+	
+	替代方法是存储为局部变量，然后传递局部变量
+	
+	```python
+	class WordFunctions(object):
+		...
+		def getMatchesMemberReference(self, rdd):
+			query = self.query
+			return rdd.filter(lambda x: query in x)
+	```
+
+* spark中collect函数可以打印出rdd中所有的数值，但是需要保证内存装的下，collectAsMap方法和collect类似，用于pair RDD，最终返回Map类型的结果
+
+    ```python
+    rdd = sc.parallelize([(1, 2), (1, 3), (3, 3)])
+    rdd.collectAsMap()
+
+    # {1: 3, 3: 3}
+    ```
+
+    RDD中同一个key中存有多个value，后面的会覆盖前面的，最终得到的结果就是key唯一
+
+* spark的分区操作
+
+    spark能够对数据集在节点间的分区进行控制，在分布式程序中，通信的代价是很大的，因此控制数据分布以获得最少的网络传输可以极大地提升整体性能。分区并不是对所有的应用都有好处的--比如，如果给定RDD只需要被扫描一次，我们完全没必要预先进行分区处理。类似`join()`，`cogroup()`，`reduceByKey()`等操作，分区很有好处
+
+    python中分区例子
+
+    ```python
+    rdd.partitionBy(100)
+    ```
 
 <h3 id="hbase">hbase</h3>
 
@@ -421,6 +480,17 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 <h3 id="zk">zookeeper</h3>
 
-* ZooKeeper维护着一个树形层次结构，树中的节点被称为znode。znode可以用于存储数据，并且有一个与之相关联的ACL。ZooKeeper被设计用来实现协调服务(这类服务通常使用小数据文件)，而不是用于大容量数据存储，因此一个znode能存储的数据被限制在1MB以内
+* [ZooKeeper简介](https://juejin.im/post/5b970f1c5188255c865e00e7?utm_source=gold_browser_extension)
+
+* ZooKeeper维护着一个树形层次结构，树中的节点被称为znode。znode可以用于存储数据，并且有一个与之相关联的ACL(AccessControlLists)。ZooKeeper被设计用来实现协调服务(这类服务通常使用小数据文件)，而不是用于大容量数据存储，因此一个znode能存储的数据被限制在1MB以内
 
 * ZooKeeper可以用来实现分布式锁，分布式锁能够在一组进程之间提供互斥机制，使得在任何时刻只有一个进程可以持有锁。分布式锁可以用于在大型分布式系统中实现领导者选举，在任何时间点，持有锁的那个进程就是系统的领导者。为了使用ZooKeeper来实现分布式锁服务，我们使用顺序znode来为那些竞争锁的进程强制排序。思路很简单：首先指定一个作为锁的znode，通常用它来描述被锁定的实体，称为\/leader，然后希望获得锁的客户端创建一些短暂顺序znode，作为锁znode的子节点。在任何时间点，顺序号最小的客户端将持有锁。例如，有两个客户端差不多同时创建znode，分别为/leader/lock-1和/leader/lock-2，那么创建/leader/lock-1的客户端将会持有锁，因为znode顺序号最小，只有前一个znode释放了锁，后一个才能获得锁
+
+* 为什么最好使用奇数台服务器构成ZooKeeper集群
+
+    我们知道在ZooKeeper中Leader选举算法采用了Zab(ZooKeeper Atomic Broadcast 原子广播)协议。Zab核心思想是当多数Server写成功，则任务数据写成功
+
+    * 如果有3个Server，则最多允许1个Server挂掉
+    * 如果有4个Server，则同样最多允许1个Server挂掉
+    
+    既然3个或者4个Server，同样最多允许1个Server挂掉，那么它们的可靠性是一样的，所以选择奇数个ZooKeeper Server即可
