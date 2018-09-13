@@ -468,6 +468,37 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
     rdd.partitionBy(100)
     ```
 
+* Spark的共享变量类型：广播和累加器
+
+    * 广播，可以高效的让程序向所有工作节点发送一个较大的只读值，以供一个或多个Spark操作使用
+
+        ```python
+        broadcast_var = sc.broadcast(T)
+
+        在工作节点可以通过broadcast_var.value来获取广播变量
+        ```
+    
+    * 累加器，可以在不同的工作节点写累加器，然后在驱动器程序中调用
+
+        ```python
+        # 在Python中累加空行
+
+        file = sc.textFile(inputfile)
+        blankLines = sc.accumulator(0)
+        
+        def extractCallSigns(line):
+            global blankLines
+
+            if line == '':
+                blankLines += 1
+
+            return line.split(' ')
+
+        callSigns = file.flatMap(extractCallSigns)
+        callSigns.saveAsTextFile(outputDir)
+        print 'Blank lines: %d' % blankLines.value
+        ```
+
 <h3 id="hbase">hbase</h3>
 
 * hbase是一个在HDFS上开发的面向列的分布式数据库，如果需要实时地随机访问超大规模数据集，就可以使用HBase这一Hadoop应用
