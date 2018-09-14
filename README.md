@@ -499,6 +499,47 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
         print 'Blank lines: %d' % blankLines.value
         ```
 
+* 基于分区进行操作
+
+    * mapPartitions(f)，f的参数是各分区的迭代器，return一个迭代器
+
+        ```python
+        rdd = sc.parallelize([1, 2, 3, 4], 4)
+        def f(units): yield sum(units)
+        rdd.mapPartitions(f).collect()
+        # [3, 7]
+        ```
+
+    * mapPartitionsWithIndex(f), f的参数是partition的idx和迭代器，return一个迭代器
+
+        ```python
+        rdd = sc.parallelize([1, 2, 3, 4], 4)
+        def f(idx, units): yield idx
+        rdd.mapPartitionsWithIndex(f).sum()
+        # 6
+        ```
+
+    * foreachPartition(f)，f的参数是一个迭代器
+
+        ```python
+        rdd = sc.parallelize([1, 2, 3, 4], 4)
+        def f(units):
+            for u in units:
+                print u
+        rdd.foreachPartition(f)
+        ```
+
+* spark应用提交到集群上的方法: spark-submit --py-files \*.py --master yarn-client python\_file.py
+
+* 在yarn-client模式或者独立模式下的spark应用，可以在驱动器ip下的4040端口查看spark任务的状态，DAG等信息，很有用
+
+* spark性能优化
+
+    * 利用分区提高并行度
+    * 当Spark需要通过网络传输数据，或是将数据溢写到磁盘上，Spark需要把数据序列化为二进制文件，可以采用Kryo的第三方序列化库，能够获得更短的序列化时间和更高的压缩比
+    * 使用persist或者cache方法缓存分区，避免重复计算
+    * 设置executor节点的cores和memory
+
 <h3 id="hbase">hbase</h3>
 
 * hbase是一个在HDFS上开发的面向列的分布式数据库，如果需要实时地随机访问超大规模数据集，就可以使用HBase这一Hadoop应用
