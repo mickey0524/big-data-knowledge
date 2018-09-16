@@ -540,6 +540,30 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
     * 使用persist或者cache方法缓存分区，避免重复计算
     * 设置executor节点的cores和memory
 
+* spark sql可以直接通过hivesql访问hive表格的数据，需要把hive\_site.xml放到spark的conf文件夹中，也可以直接访问hdfs的parquet，orc文件，然后注册临时表
+
+    ```python
+    from pyspark.sql import HiveContext
+
+    hiveCtx = HiveContext(sc)
+    rows = hiveCtx.sql(hive_sql)
+
+    data = hiveCtx.read.parquet(path of parquet in hdfs)
+    data.registerTempTable('table') # 作为临时表
+    hiveCtx.sql("select * from table")
+    ```
+
+* spark sql允许用户自定义函数(UDF)，可以将自定义函数类似hive中的count函数一样用于sql中
+
+    ```python
+    hiveCtx.registerFunction('strLen', lambda x: len(x), IntegerType())
+    df = hiveCtx.sql("select strLen('name') from table")
+    ```
+
+* 和Spark基于RDD的概念很相似，Spark Streaming使用离散化流作为抽象表示，叫做DStream
+
+* Dstream的转化操作可以分为有状态和无状态两种
+    
 <h3 id="hbase">hbase</h3>
 
 * hbase是一个在HDFS上开发的面向列的分布式数据库，如果需要实时地随机访问超大规模数据集，就可以使用HBase这一Hadoop应用
