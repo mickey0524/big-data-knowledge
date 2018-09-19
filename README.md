@@ -292,6 +292,8 @@
 
     上面的`map`和`reduce`关键字都可以用`transform`来替换
 
+* [Hive中实现Group By后，取Top K条记录](https://www.coder4.com/archives/4060)，这篇博客用的是UDF，python的话也可以使用transform调用map.py来实现相似的功能
+
 <h3 id="mapreduce">mapreduce</h3>
 
 * MapReduce简介
