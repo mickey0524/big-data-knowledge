@@ -286,13 +286,13 @@
         using 'python is_good_quality.py'
         as year, temperature)map_output
     reduce year, temperature
-    using 'max_temperature_reduce.py'
+    using 'python max_temperature_reduce.py'
     as year, temperature;
     ```
 
     上面的`map`和`reduce`关键字都可以用`transform`来替换
 
-* [Hive中实现Group By后，取Top K条记录](https://www.coder4.com/archives/4060)，这篇博客用的是UDF，python的话也可以使用transform调用map.py来实现相似的功能
+* [Hive中实现Group By后，取Top K条记录](https://www.coder4.com/archives/4059)，这篇博客用的是UDF，python的话也可以使用transform调用map.py来实现相似的功能
 
 <h3 id="mapreduce">mapreduce</h3>
 
@@ -560,6 +560,13 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
     ```python
     hiveCtx.registerFunction('strLen', lambda x: len(x), IntegerType())
     df = hiveCtx.sql("select strLen('name') from table")
+    ```
+
+    如果要返回一个list，可以使用types里的StructField和StructType来自定义
+
+    ```python
+    schema = StructType([StructType('name', StringType(), True), StructType('age', IntegerType(), True)])
+    udf_func = hiveCtx.registerFunction('udf_func', lambda x: (x, 1), schema)
     ```
 
 * 和Spark基于RDD的概念很相似，Spark Streaming使用离散化流作为抽象表示，叫做DStream
