@@ -569,6 +569,15 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
     udf_func = hiveCtx.registerFunction('udf_func', lambda x: (x, 1), schema)
     ```
 
+* spark的rdd和spark.sql的df的横行merge和纵向merge方法
+
+    * rdd
+        * 横向 map / mapPartitions
+        * 纵向 union
+    * df
+        * 横向 crossJoin(select alias) / join
+        * 纵向 union
+
 * 和Spark基于RDD的概念很相似，Spark Streaming使用离散化流作为抽象表示，叫做DStream
 
 * Dstream的转化操作可以分为有状态和无状态两种
@@ -580,6 +589,8 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 * hbase也是一个master-slave的存储模型，它用一个master节点协调管理一个或多个regionserver从属机。hbase主控机(master)负责启动一个全新的安装，把区域分配给注册的regionserver，恢复regionserver的故障，master的负载很轻。regionsever负责零个或多个的区域管理以及响应客户端的读写请求。regionserver还负责区域的划分并通知HBase master有了新的子域
 
     ![hbase-master-slave](./imgs/hbase-master-slave.jpg)
+
+* [spark 将dataframe数据写入hive表](https://blog.csdn.net/zgc625238677/article/details/53928320)，基本思路是先将df注册为本地table，再从本地table insert到hive表中
 
 * [HBase深入浅出](https://www.ibm.com/developerworks/cn/analytics/library/ba-cn-bigdata-hbase/index.html)
 
