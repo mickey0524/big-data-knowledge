@@ -578,9 +578,11 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
         * 横向 crossJoin(select alias) / join
         * 纵向 union
 
-* 和Spark基于RDD的概念很相似，Spark Streaming使用离散化流作为抽象表示，叫做DStream
+* 和Spark基于RDD的概念很相似，Spark Streaming使用离散化流作为抽象表示，叫做DStream，Spark Streaming 会把每个interval收到的数据放入DStream
 
-* Dstream的转化操作可以分为有状态和无状态两种
+* Dstream的转化操作可以分为有状态和无状态两种，有状态的可以创建window，处理多个interval的数据
+
+* [Spark Streaming 简介](http://bigdataer.net/?p=244)
     
 <h3 id="hbase">hbase</h3>
 
