@@ -8,6 +8,7 @@
 * [spark](#spark)
 * [hbase](#hbase)
 * [zookeeper](#zk)
+* [kafka](#kafka)
 
 <h3 id="hdfs">hdfs</h3>
 
@@ -612,3 +613,20 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
     * 如果有4个Server，则同样最多允许1个Server挂掉
     
     既然3个或者4个Server，同样最多允许1个Server挂掉，那么它们的可靠性是一样的，所以选择奇数个ZooKeeper Server即可
+
+<h3 id="kafka">kafka</h3>
+
+* Kafka专为分布式高吞吐量系统而设计，是一个分布式发布 - 订阅消息系统和一个强大的队列，可以处理大量的数据，并使您能够将消息从一个端点传递到另一个端点。 Kafka适合离线和在线消息消费。 Kafka消息保留在磁盘上，并在群集内复制以防止数据丢失。 Kafka构建在ZooKeeper同步服务之上。 它与Apache Storm和Spark非常好地集成，用于实时流式数据分析
+
+* kafka的优点
+
+    * 可靠性 - Kafka是分布式，分区，复制和容错的
+    * 可扩展性 - Kafka消息传递系统轻松缩放，无需停机
+    * 耐用性 - Kafka使用"分布式提交日志"，这意味着消息会尽可能快地保留在磁盘上，因此它是持久的
+    * 性能 - Kafka对于发布和订阅消息都有高吞吐量。即使存储了许多TB的消息，它也保持稳定的性能。Kafka非常快，并保证零停机和零数据丢失
+
+* kafka架构图
+
+    ![kafka架构](./imgs/kafka.jpg)
+
+* kafka中一个topic可以由一个consumer\_group访问，group中的每个consumer负责一部分partition，如果consumer和kafka的连接经常中断，那么会频繁触发kafka的rebalance，这样就会在consumer端积压数据，导致数据流不下去
