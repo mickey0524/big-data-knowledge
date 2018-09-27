@@ -295,6 +295,37 @@
 
 * [Hive中实现Group By后，取Top K条记录](https://www.coder4.com/archives/4059)，这篇博客用的是UDF，python的话也可以使用transform调用map.py来实现相似的功能
 
+* [Hive 数据倾斜解决方案（调优）](https://blog.csdn.net/s646575997/article/details/51510661)
+
+* hive join 优化 -- 小表join大表
+
+    * 小、大表join
+        
+        在小表和大表进行join的时候，将**小表放在前面**，效率会高，hive会将小表缓存
+
+    * mapjoin
+
+        使用mapjoin将小表放入内存，在map端和大表逐一匹配，从而省去reduce
+
+        ```
+        select
+            /*+mapjoin(b)*/ a.a1,
+            a.a2,
+            b.b2
+        from
+            tablea a
+        join
+            tableb b
+        on
+            a.a1 = b.b1
+        ```
+    
+        在0.7版本后，也可以用配置来自动化
+
+        ```
+        set hive.auto.convert.join=true;
+        ```
+
 <h3 id="mapreduce">mapreduce</h3>
 
 * MapReduce简介
@@ -585,6 +616,8 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 * [Spark Streaming 简介](http://bigdataer.net/?p=244)
     
+* [spark 将dataframe数据写入hive表](https://blog.csdn.net/zgc625238677/article/details/53928320)，基本思路是先将df注册为本地table，再从本地table insert到hive表中
+
 <h3 id="hbase">hbase</h3>
 
 * hbase是一个在HDFS上开发的面向列的分布式数据库，如果需要实时地随机访问超大规模数据集，就可以使用HBase这一Hadoop应用
@@ -592,8 +625,6 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 * hbase也是一个master-slave的存储模型，它用一个master节点协调管理一个或多个regionserver从属机。hbase主控机(master)负责启动一个全新的安装，把区域分配给注册的regionserver，恢复regionserver的故障，master的负载很轻。regionsever负责零个或多个的区域管理以及响应客户端的读写请求。regionserver还负责区域的划分并通知HBase master有了新的子域
 
     ![hbase-master-slave](./imgs/hbase-master-slave.jpg)
-
-* [spark 将dataframe数据写入hive表](https://blog.csdn.net/zgc625238677/article/details/53928320)，基本思路是先将df注册为本地table，再从本地table insert到hive表中
 
 * [HBase深入浅出](https://www.ibm.com/developerworks/cn/analytics/library/ba-cn-bigdata-hbase/index.html)
 
