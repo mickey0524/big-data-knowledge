@@ -9,6 +9,7 @@
 * [hbase](#hbase)
 * [zookeeper](#zk)
 * [kafka](#kafka)
+* [nsq](#nsq)
 
 <h3 id="hdfs">hdfs</h3>
 
@@ -661,3 +662,36 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
     ![kafka架构](./imgs/kafka.jpg)
 
 * kafka中一个topic可以由一个consumer\_group访问，group中的每个consumer负责一部分partition，如果consumer和kafka的连接经常中断，那么会频繁触发kafka的rebalance，这样就会在consumer端积压数据，导致数据流不下去
+
+<h3 id="nsq">nsq</h3>
+
+* nsq的三大核心组件
+
+	* nsqlookupd是守护进程负责管理拓扑信息。客户端通过查询nsqlookupd来发现指定话题(topic)的生产者，并且 nsqd 节点广播话题（topic）和通道（channel）信息。简单的说nsqlookupd就是中心管理服务，它使用tcp(默认端口4160)管理nsqd服务，使用http(默认端口4161)管理nsqadmin服务。同时为客户端提供查询功能
+
+		总的来说，nsqlookupd具有一下功能或特性
+
+        * 唯一性，在一个Nsq服务中只有一个nsqlookupd服务。当然也可以在集群中部署多个nsqlookupd，但它们之间是没有关联的
+        * 去中心化，即使nsqlookupd崩溃，也会不影响正在运行的nsqd服务
+        * 充当nsqd和naqadmin信息交互的中间件
+        * 提供一个http查询服务，给客户端定时更新nsqd的地址目录
+
+	* nsqadmin是一套 WEB UI，用来汇集集群的实时统计，并执行不同的管理任务
+		
+		* 提供一个对topic和channel统一管理的操作界面以及各种实时监控数据的展示，界面设计的很简洁，操作也很简单
+		* 展示所有message的数量
+		* 能够在后台创建topic和channel
+		* nsqadmin的所有功能都必须依赖于nsqlookupd，nsqadmin只是向nsqlookupd传递用户操作并展示来自nsqlookupd的数据
+
+	* nsqd是一个守护进程，负责接收、排队、投递消息给客户端，真正干活的就是这个服务，它主要负责message的收发，队列的维护。nsqd会默认监听一个tcp端口(4150)和一个http端口(4151)以及一个可选的https端口
+
+		总的来说，nsqd 具有以下功能或特性
+		
+		* 对订阅了同一个topic，同一个channel的消费者使用负载均衡策略（不是轮询）
+		* 只要channel存在，即使没有该channel的消费者，也会将生产者的message缓存到队列中（注意消息的过期处理）
+		* 保证队列中的message至少会被消费一次，即使nsqd退出，也会将队列中的消息暂存磁盘上(结束进程等意外情况除外)
+		* 限定内存占用，能够配置nsqd中每个channel队列在内存中缓存的message数量，一旦超出，message将被缓存到磁盘中
+		* topic，channel一旦建立，将会一直存在，要及时在管理台或者用代码清除无效的topic和channel，避免资源的浪费
+
+		
+				
