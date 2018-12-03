@@ -327,6 +327,16 @@
         set hive.auto.convert.join=true;
         ```
 
+* hive 获取分组 topk 
+
+    hive 不能像 mysql 一样用局部变量和嵌套子查询来做，但是 hive 提供了 `rank`，`row_number`，`dense_rank` 三个函数
+    
+    [Hive分组取Top N数据](https://blog.csdn.net/WYpersist/article/details/80318305)
+
+* hive 行列转换
+
+    [Hive--行转列（Lateral View explode()）和列转行（collect_set() 去重）](http://www.voidcn.com/article/p-kvqbqneb-bbk.html)
+
 <h3 id="mapreduce">mapreduce</h3>
 
 * MapReduce简介
