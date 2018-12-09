@@ -703,5 +703,5 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 		* 限定内存占用，能够配置nsqd中每个channel队列在内存中缓存的message数量，一旦超出，message将被缓存到磁盘中
 		* topic，channel一旦建立，将会一直存在，要及时在管理台或者用代码清除无效的topic和channel，避免资源的浪费
 
-		
-				
+    * [nsq 的源码分析](https://github.com/mickey0524/nsq-analysis)
+			
