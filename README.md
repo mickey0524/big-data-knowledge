@@ -675,6 +675,10 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 * [Kafka 工作原理](https://www.jianshu.com/p/6cbe28a44543)
 
+* [Kafka 复制机制](https://colobu.com/2017/11/02/kafka-replication/)
+
+* [Kafka vs Nsq](https://zhuanlan.zhihu.com/p/46421050)
+
 <h3 id="nsq">nsq</h3>
 
 * nsq的三大核心组件
