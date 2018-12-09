@@ -673,6 +673,8 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 * kafka中一个topic可以由一个consumer\_group访问，group中的每个consumer负责一部分partition，如果consumer和kafka的连接经常中断，那么会频繁触发kafka的rebalance，这样就会在consumer端积压数据，导致数据流不下去
 
+* [Kafka 工作原理](https://www.jianshu.com/p/6cbe28a44543)
+
 <h3 id="nsq">nsq</h3>
 
 * nsq的三大核心组件
