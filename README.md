@@ -679,6 +679,68 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 * [Kafka vs Nsq](https://zhuanlan.zhihu.com/p/46421050)
 
+* Kafka 需要 Zookeeper 做两件事情
+
+    * 将 broker 的一些元信息存储进 Zookeeper
+    * 使用 Zookeeper 实现领导人选举
+
+* 每个 Partition 物理上对应一个文件夹，里面存放很多 Segment，这样删除数据的时候直接删除最早的 Segment 就行，提高了效率
+
+* Kafka 在 Partition 之间的无序的，在 Partition 内部是有序的
+
+* Kafka 的 Producer 默认是异步发送数据的，其实也是 GC(group commit) 的概念，可以显示调用 flush 来立即发送
+
+* Kafka 的 Producer 具有 Retry 机制，发送也是异步的，有可能出现 1 在 Retry 的时候，2 已经发送成功了，这样即使发送到一个 Partition，顺序也乱了，如果非常在意这种情况的话，可以将 max.in.flight.requests.per.connection 设置为 1，同样的，这样比较影响性能
+
+* 在 Producer 发送消息的时候，如果不显示指定 key，消息路由 Partitioner 会采用轮询的方式，将消息负载均衡的打到每个 Partition 中，如果有非常在意消费顺序的消息需要发送的时候，就可以显示指定 key，这样 Producer 就可以将该部分数据写入一个 Partition 中，最简单的实现就是对 key 做 hash % Partition 数目
+
+* Kafka Rebalance 的两种方法
+
+    * 自治式 Rebalance：每个 Consumer 决定自己是否需要 Rebalance
+
+        * Consumer 启动时将其 ID 注册到 Consumer Group 下，在 ZK 上的路径为 /consumers/[consumer group]/ids/[consumer id]
+        * 在 /consumers/[consumer group]/ids 上注册 Watch
+        * 在 /brokers/ids 上注册Watch
+        * 强制自己在 Consumer Group 内启动 Rebalance 流程
+
+        特点：
+        
+        * 任何 Broker 或者 Consumer 的增减都会触发所有的 Consumer 的 Rebalance
+        * 每个 Consumer 分别单独通过 ZK 判断哪些 Broker 和 Consumer 宕机了，那么不同 Consumer 在同一时刻从 ZK 上看到的 View 可能就不同，这是由 ZK 的特性决定的，这就会造成不正确的 Rebalance 尝试
+        * 所有的 Consumer 都不知道其他的 Consumer 是否 Rebalance 是否成功，这可能会导致 Kafka 工作在一个不正确的状态
+    
+    * 集中式 Rebalance：基于 Coordinator(协调者) 的 Rebalance
+        
+        * 从 ZK 读取所有的 Topic 以及是否有新的 Topic 被创建
+        * 监听 Topic 的变化以及 Partition 的变化
+        * 接收 Consumer 的注册，为每一个 Group 选择一个 Leader
+        * Leader 通过 SyncGroup 将 Rebalance 分配方案发给 Coordinator
+        * 其他 Member 通过 SyncGroup 从 Coordinator 获取各自的分配结果
+
+* Kafka 采用 Partition 级别的复制来实现 HA，ISR 是 Kafka 中经典的高可用机制
+
+    * Leader 会维护一个与其基本保持同步的 Replica 列表，该列表称为 ISR（in-sync Replica）
+    * 如果一个 Follower 比 Leader 落后太多，或者超过一定时间未发起数据复制请求，则 Leader 将其从 ISR 中移除
+    * 当 ISR 中所有 Replica 都向 Leader 发送 ACK 时，Leader 即 Commit
+
+* 当 ISR 中的机器全部宕机，Kafka有两种处理方法
+
+    * 等待 ISR 中任一 Replica 恢复，并选它为 Leader
+        
+        * 等待时间较长，降低可用性
+        * 或 ISR 中的所有 Replica 都无法恢复或数据丢失，则该 Partition 将用不可用
+
+    * 选择第一个恢复的 Replica 为新的 Leader，无论它是否在 ISR 中
+
+        * 并未包含所有已被之前 Leader Commit 过的消息，因此会造成数据丢失
+        * 可用性较高
+
+    CAP 无法同时满足，默认采用第二种，保证可用性
+            
+* kafka-zookeeper
+
+    ![kafka-zookeeper](./imgs/zk-kafka.png)
+
 <h3 id="nsq">nsq</h3>
 
 * nsq的三大核心组件
