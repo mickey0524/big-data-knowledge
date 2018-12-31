@@ -741,6 +741,10 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
     ![kafka-zookeeper](./imgs/zk-kafka.png)
 
+* 个人觉得讲的不错的博客
+
+    ![Kafak 设计解析](http://www.jasongj.com/2015/03/10/KafkaColumn1/)
+
 <h3 id="nsq">nsq</h3>
 
 * nsq的三大核心组件
