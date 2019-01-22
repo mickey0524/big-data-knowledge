@@ -675,6 +675,8 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 	self\_sid：当前服务器自己的SID。
 	
 	self\_zxid：当前服务器自己的ZXID。
+
+    事务 id 是一个64位的整数，前32位代表 leader 选择的轮次，每重新选举一次 leader，自增1，同时将后32位清零，后32位代表本轮内的事务顺序，一条事务到来的时候，自增1
 	
 	每次对收到的投票的处理，都是对(vote\_sid, vote\_zxid)和(self\_sid, self\_zxid)对比的过程。
 
@@ -691,6 +693,11 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 	![zk_leader_election](./imgs/zk_leader_election.jpg)
 	
 	由上面规则可知，通常那台服务器上的数据越新（ZXID会越大），其成为Leader的可能性越大，也就越能够保证数据的恢复。如果ZXID相同，则SID越大机会越大
+	
+* Zab 协议恢复模式的保证
+
+	* 我们绝不能遗忘已经被deliver的消息，若一条消息在一台机器上被deliver，那么该消息必须将在每台机器上deliver
+	* 我们必须丢弃已经被skip的消息，比如 leader 发出了一个提议，但是还没有 commit 就挂了，这样恢复的时候，会重新 commit，但是其他 server 是没有 commit 这条指令的，这样就会造成不一致，zk 的 zxid 的前32位可以避免这种情况发生，因为重新选举之后，前32位自增加一，这样，当收到比自己前32位小的时候 zxid 的时候，直接丢弃即可
 
 * [zk 系列文章](https://www.cnblogs.com/sunddenly/p/4138580.html)
 
