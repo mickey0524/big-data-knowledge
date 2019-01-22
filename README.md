@@ -692,6 +692,7 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 	
 	由上面规则可知，通常那台服务器上的数据越新（ZXID会越大），其成为Leader的可能性越大，也就越能够保证数据的恢复。如果ZXID相同，则SID越大机会越大
 
+* [zk 系列文章](https://www.cnblogs.com/sunddenly/p/4138580.html)
 
 <h3 id="kafka">kafka</h3>
 
