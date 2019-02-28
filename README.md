@@ -333,9 +333,60 @@
     
     [Hive分组取Top N数据](https://blog.csdn.net/WYpersist/article/details/80318305)
 
+    ```
+    select
+        name,
+        subject,
+        score,
+        rank() over (partition by name order by score desc) as rank
+    from
+        table
+    group by
+        name,
+        subject,
+        score
+    ```
+
 * hive 行列转换
 
     [Hive--行转列（Lateral View explode()）和列转行（collect_set() 去重）](http://www.voidcn.com/article/p-kvqbqneb-bbk.html)
+    
+    * 行转列
+
+        ```
+        select
+            col1,
+            col2,
+            name
+        from
+            game.game_test
+        lateral view explode(split(col3, ',')) col3 as name
+        ```
+    
+    * 列转行
+
+        ```
+        select
+            col1,
+            col2,
+            concat_ws(',', collect_set(col3)) as col3
+        from
+            game.game_test
+        group by
+            col1,
+            col2
+        ``` 
+
+* hive 随机取样
+
+    ```
+    select
+        *
+    from
+        table
+    distribute by rand()
+    sort by rand()
+    ```
 
 <h3 id="mapreduce">mapreduce</h3>
 
