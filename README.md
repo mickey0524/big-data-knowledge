@@ -406,7 +406,7 @@
 
 * MapReduce的shuffle过程
 
-    * [MapReduce shuffle过程详解](https://blog.csdn.net/u014374284/article/details/49205885) 这篇博客讲的还阔以，但是有两个地方有问题，一是key通过hash取模获得partition是在进入kvbuffer之后，二是reduce worker从map worker copy数据不是通过http，二是通过rpc
+    * [MapReduce shuffle过程详解](https://blog.csdn.net/u014374284/article/details/49205885) 这篇博客讲的还阔以，但是有两个地方有问题，一是key通过hash取模获得partition是在进入kvbuffer之后，二是reduce worker从map worker copy数据不是通过http，而是通过rpc
 
     * [Hadoop深入学习：MapReduce的Shuffle过程详解](http://flyingdutchman.iteye.com/blog/1879642)
 
@@ -450,8 +450,10 @@
 		* jobconf：提交作业的一些配置属性，常见配置：
 			* mapred.map.tasks：map task数目
 			* mapred.reduce.tasks：reduce task数目
+			* stream.map.output.field.separator：指定 map task 输出记录中 key 所使用的分隔符，默认是使用 \t
 			* stream.num.map.output.key.fields：指定map task输出记录中key所占的域数目
-			* num.key.fields.for.partition：指定对key分出来的前几部分做partition，而非整个key
+			* map.output.key.field.separator：指定 partition 阶段对 map 输出使用哪种分隔符
+			* num.key.fields.for.partition：指定对key分出来的前几部分做partition，而非整个key，需要配合 -partitioner org.apache.hadoop.mapred.lib.KeyFieldBasedPartitioner 一同使用，修改默认的 hashPartition
 			* mapred.compress.map.output：map的输出是否压缩
 			* mapred.map.output.compression.codec：map的输出压缩方式
 			* mapred.output.compress：reduce的输出是否压缩
