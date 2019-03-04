@@ -754,6 +754,8 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 * [zk 系列文章](https://www.cnblogs.com/sunddenly/p/4138580.html)
 
+* zk 并不能保证不同的 client 的实时一致性，这取决于 client 连接的 zk server 节点，类似于网络延迟，zk 节点间的数据同步也需要时间，watch 触发去读的时候，可能就会看到不同的 view
+
 <h3 id="kafka">kafka</h3>
 
 * Kafka专为分布式高吞吐量系统而设计，是一个分布式发布 - 订阅消息系统和一个强大的队列，可以处理大量的数据，并使您能够将消息从一个端点传递到另一个端点。 Kafka适合离线和在线消息消费。 Kafka消息保留在磁盘上，并在群集内复制以防止数据丢失。 Kafka构建在ZooKeeper同步服务之上。 它与Apache Storm和Spark非常好地集成，用于实时流式数据分析
