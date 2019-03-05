@@ -682,6 +682,12 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
     
 * [spark 将dataframe数据写入hive表](https://blog.csdn.net/zgc625238677/article/details/53928320)，基本思路是先将df注册为本地table，再从本地table insert到hive表中
 
+* [spark 基本算子](https://blog.csdn.net/cymy001/article/details/78483723)
+
+* [spark 常见面试题](https://zhuanlan.zhihu.com/p/47499258)
+
+* [美团 spark 调优分享](https://tech.meituan.com/2016/04/29/spark-tuning-basic.html)
+
 <h3 id="hbase">hbase</h3>
 
 * hbase是一个在HDFS上开发的面向列的分布式数据库，如果需要实时地随机访问超大规模数据集，就可以使用HBase这一Hadoop应用
