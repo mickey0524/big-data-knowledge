@@ -690,6 +690,86 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 * [Spark Shuffle原理及相关调优](http://sharkdtu.com/posts/spark-shuffle.html)
 
+* Spark 如何防止内存溢出？
+
+    * driver 端的内存溢出，提高 SparkConf 里 spark.driver.memory 的数值
+    * map过程产生大量对象导致内存溢出，rePartition 成更多的 partition
+    * shuffle后内存溢出，这是 Spark reducer 去 shuffle read 的时候，内容太多导致 OOM，可以增加 shuffle parition 的数量，可以通过在 SparkConf 里设置 spark.sql.shuffle.partitions
+
+* Spark 数据倾斜
+
+    如果 Spark 任务长时间卡在最后一个 task，那么很可能是发生了数据倾斜
+
+    * 首先，我们分析一下，是那些 key 导致了数据倾斜
+    * 如果是 null，空值或者一些测试用的没有意义的数据，直接过滤即可
+    * 如果是业务相关的数据，可以将异常的key过滤出来单独处理，最后与正常数据的处理结果进行union操作，也可以将原始的 key 转化为 key + 随机值(例如Random.nextInt)，进行操作后，去掉随机值，再进行一次操作
+
+* Spark 优化
+
+	* 当缩小 partition 的时候，使用 coalesce 替换 repartition
+	* 在 Python 中，传递给 Spark 参数的时候，如果是 class 的对象，先将对象定义为本地对象，再上传，不然会因为这个函数将整个对象上传
+	* Spark shuffle 里的 block size 不能大于2g，设置 spark.sql.shuffle.partitions 来增加 block num
+	* 尽可能使用 reduceByKey 代替 groupByKey
+
+		![reduceByKey](./imgs/reduceByKey.png)
+		![groupByKey](./imgs/groupByKey.png)
+	
+	* Spark 应用程序中，在对 RDD 进行 shuffle 和 cache 时，数据都是需要被序列化才可以存储的，此时除了 IO 外，数据序列化也可能是应用程序的瓶颈。这里推荐使用 kryo 序列库，在数据序列化时能保证较高的序列化效率
+
+		```
+		sc_conf = SparkConf()
+	   sc_conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+		```
+	
+	* Spark 的 shuffle 过程非常消耗资源，应该尽量避免
+
+		Broadcast与map进行join代码示例
+
+		```
+		// 传统的join操作会导致shuffle操作。
+		// 因为两个RDD中，相同的key都需要通过网络拉取到一个节点上，由一个task进行join操作。
+		val rdd3 = rdd1.join(rdd2)
+		
+		// Broadcast+map的join操作，不会导致shuffle操作。
+		// 使用Broadcast将一个数据量较小的RDD作为广播变量。
+		val rdd2Data = rdd2.collect()
+		val rdd2DataBroadcast = sc.broadcast(rdd2Data)
+		
+		// 在rdd1.map算子中，可以从rdd2DataBroadcast中，获取rdd2的所有数据。
+		// 然后进行遍历，如果发现rdd2中某条数据的key与rdd1的当前数据的key是相同的，那么就判定可以进行join。
+		// 此时就可以根据自己需要的方式，将rdd1当前数据与rdd2中可以连接的数据，拼接在一起（String或Tuple）。
+		val rdd3 = rdd1.map(rdd2DataBroadcast...)
+		
+		// 注意，以上操作，建议仅仅在rdd2的数据量比较少（比如几百M，或者一两G）的情况下使用。
+		// 因为每个Executor的内存中，都会驻留一份rdd2的全量数据。
+		```
+	
+	* 使用mapPartitions替代普通map
+	* 使用foreachPartitions替代foreach
+	* 使用filter之后进行coalesce操作
+	* 广播大变量
+		
+		```
+		// 以下代码在算子函数中，使用了外部的变量。
+		// 此时没有做任何特殊操作，每个task都会有一份list1的副本。
+		val list1 = ...
+		rdd1.map(list1...)
+		
+		// 以下代码将list1封装成了Broadcast类型的广播变量。
+		// 在算子函数中，使用广播变量时，首先会判断当前task所在Executor内存中，是否有变量副本。
+		// 如果有则直接使用；如果没有则从Driver或者其他Executor节点上远程拉取一份放到本地Executor内存中。
+		// 每个Executor内存中，就只会驻留一份广播变量副本。
+		val list1 = ...
+		val list1Broadcast = sc.broadcast(list1)
+		rdd1.map(list1Broadcast...)
+		```
+	
+	* 设置 spark.default.parallelism
+
+		* 参数说明：该参数用于设置每个stage的默认task数量。这个参数极为重要，如果不设置可能会直接影响你的Spark作业性能。
+		* 参数调优建议：Spark作业的默认task数量为500~1000个较为合适。很多同学常犯的一个错误就是不去设置这个参数，那么此时就会导致Spark自己根据底层HDFS的block数量来设置task的数量，默认是一个HDFS block对应一个task。通常来说，Spark默认设置的数量是偏少的（比如就几十个task），如果task数量偏少的话，就会导致你前面设置好的Executor的参数都前功尽弃。试想一下，无论你的Executor进程有多少个，内存和CPU有多大，但是task只有1个或者10个，那么90%的Executor进程可能根本就没有task执行，也就是白白浪费了资源！因此Spark官网建议的设置原则是，设置该参数为num-executors * executor-cores的2~3倍较为合适，比如Executor的总CPU core数量为300个，那么设置1000个task是可以的，此时可以充分地利用Spark集群的资源
+		
+
 <h3 id="hbase">hbase</h3>
 
 * hbase是一个在HDFS上开发的面向列的分布式数据库，如果需要实时地随机访问超大规模数据集，就可以使用HBase这一Hadoop应用
