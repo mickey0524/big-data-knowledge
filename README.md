@@ -389,6 +389,28 @@
     sort by rand()
     ```
 
+* [Hive 常用函数](https://www.cnblogs.com/MOBIN/p/5618747.html#4)
+
+* Hive 的 like 和 rlike 的区别
+
+	like不是正则，而是通配符。这个通配符可以看一下SQL的标准，例如%代表任意多个字符。rlike是正则，正则的写法与java一样。'\'需要使用'\\',例如'\w'需要使用'\\w'
+	
+* Hive 的 count(1)、count(*) 和 count(column) 有什么区别
+
+	count(1)和count(*)一样，统计行数，包括含有null value的行数
+
+	count(column)仅统计该列非空的行数
+
+* Hive 函数中 slice, substr 和 substring 有什么区别
+
+	首先，他们都接收两个参数，slice 和 substring 接收的是起始位置和结束位置(不包括结束位置)，而 substr 接收的则是起始位置和所要返回的字符串长度
+	
+* [Hive 窗口函数](http://www.aboutyun.com/thread-12831-1-1.html)
+
+* [Hive 优化](http://www.k6k4.com/simple_question/qshow/aaqeigfak1540308027814)
+
+* Hive 底层 null 是用 '\N' 存储的
+
 <h3 id="mapreduce">mapreduce</h3>
 
 * MapReduce简介
@@ -781,6 +803,12 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 * [HBase深入浅出](https://www.ibm.com/developerworks/cn/analytics/library/ba-cn-bigdata-hbase/index.html)
 
+* [LSM 树在 HBase 中的应用](https://blog.csdn.net/liuxiao723846/article/details/52971511)
+
+* [HBase 工作原理](https://blog.csdn.net/qq_26803795/article/details/80796359)
+
+* [HBase 架构以及应用介绍](https://blog.csdn.net/devcy/article/details/79790113)
+
 <h3 id="zk">zookeeper</h3>
 
 * [ZooKeeper简介](https://juejin.im/post/5b970f1c5188255c865e00e7?utm_source=gold_browser_extension)
@@ -977,6 +1005,8 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 <h3 id="interview">大数据面试题</h3>
 
+* [大数据面试题库](http://www.k6k4.com/simple_question/qlist/4/0)
+
 * 有一个1G大小的一个文件，里面每一行是一个词，词的大小不超过16字节，内存限制大小是1M。返回频数最高的100个词
 
 	顺序读文件中，对于每个词x，取hash(x)%5000，然后按照该值存到5000个小文件（记为x0,x1,…x4999）中。这样每个文件大概是200k左右。如果其中的有的文件超过了1M大小，还可以按照类似的方法继续往下分，直到分解得到的小文件的大小都不超过1M。对每个小文件，统计每个文件中出现的词以及相应的频率（可以采用trie树/hash_map等），并取出出现频率最大的100个词（可以用含100个结点的最小堆），并把100个词及相应的频率存入文件，这样又得到了5000个文件。下一步就是把这5000个文件进行归并（类似与归并排序）的过程了
@@ -996,3 +1026,14 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 	方案2：如果允许有一定的错误率，可以使用Bloom filter，4G内存大概可以表示340亿bit。将其中一个文件中的url使用Bloom filter映射为这340亿bit，然后挨个读取另外一个文件的url，检查是否与Bloom filter，如果是，那么该url应该是共同的url（注意会有一定的错误率）
 			
+* 怎么查看 Kafka 的 Offset
+
+	老版本中，Offset 是挂在 ZK 上的，0.9 版本以上可以通过 consumer.position() 获取最新的 Offset
+	
+* Kafka 的 Message 包括哪些信息
+
+	* 一个Kafka的Message由一个固定长度的header和一个变长的消息体body组成
+	* header部分由一个字节的magic(文件格式)和四个字节的CRC32(用于判断body消息体是否正常)构成。当magic的值为1的时候，会在magic和crc32之间多一个字节的数据：attributes(保存一些相关属性，比如是否压缩、压缩格式等等)；如果magic的值为0，那么不存在attributes属性
+	* body是由N个字节构成的一个消息体，包含了具体的key/value消息
+
+* [Hive 常用函数](https://www.cnblogs.com/MOBIN/p/5618747.html#4)
