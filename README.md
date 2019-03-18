@@ -53,6 +53,7 @@
 * proquet列式存储
 
     * [深入分析Parquet列式存储格式](http://www.infoq.com/cn/articles/in-depth-analysis-of-parquet-column-storage-format)
+    * [Parquet 存储格式](https://www.cnblogs.com/hetonghai/p/9049327.html)
     * [Dremel made simple with Parquet](https://blog.twitter.com/engineering/en_us/a/2013/dremel-made-simple-with-parquet.html)
     * [Dremel: Interactive Analysis of Web-Scale Datasets](http://static.googleusercontent.com/media/research.google.com/zh-CN//pubs/archive/36632.pdf)
 
@@ -410,6 +411,8 @@
 * [Hive 优化](http://www.k6k4.com/simple_question/qshow/aaqeigfak1540308027814)
 
 * Hive 底层 null 是用 '\N' 存储的
+
+* [Hive array, map, struct 使用](https://blog.csdn.net/u010670689/article/details/72885944)
 
 <h3 id="mapreduce">mapreduce</h3>
 
