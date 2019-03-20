@@ -88,6 +88,8 @@
     
 * YARN中存在三种调度方法
 
+    [YARN的三种调度方法](https://www.cnblogs.com/sodawoods-blogs/p/8877197.html)
+
 	* FIFO
 	* 容器调度器
 	* 公平调度器
