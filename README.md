@@ -94,6 +94,20 @@
 	* 容器调度器
 	* 公平调度器
 
+* YARN 应用运行机制
+
+	![YARN](./imgs/yarn.jpg)
+	
+	[YARN 基本原理](http://kentt.top/2018/09/16/Yarn-Architecture/#applicationmasteram)
+	
+* YARN 的内存调度和 CPU 调度
+
+	[YARN 的内存调度和 CPU 调度](http://www.voidcn.com/article/p-cryxxsio-bbp.html)
+	
+* cgroup 和 namespace
+
+	[容器Cgroup和Namespace特性简介](https://blog.csdn.net/xiangxianghehe/article/details/70569920)
+
 <h3 id="hive">hive</h3>
 
 * [数据仓库基本概念](https://www.cnblogs.com/muchen/category/794750.html)
