@@ -94,6 +94,8 @@
 
 <h3 id="hive">hive</h3>
 
+* [数据仓库基本概念](https://www.cnblogs.com/muchen/category/794750.html)
+
 * 数据仓库(DW/Data Warehouse)分层原则(每家公司都有自己的规范)
 
 	* dim：维度层，一般用于存储属性信息，多用于联表查询
