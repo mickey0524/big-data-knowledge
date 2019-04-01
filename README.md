@@ -831,6 +831,8 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 * [HBase 架构以及应用介绍](https://blog.csdn.net/devcy/article/details/79790113)
 
+* [一文了解数据库索引：哈希、B-Tree 与 LSM](https://juejin.im/post/5ca07cd851882567b2034938?utm_source=gold_browser_extension#heading-9)
+
 <h3 id="zk">zookeeper</h3>
 
 * [ZooKeeper简介](https://juejin.im/post/5b970f1c5188255c865e00e7?utm_source=gold_browser_extension)
