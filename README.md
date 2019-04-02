@@ -995,6 +995,8 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 * Producer 在发布消息到某个 Partition 时，先通过 ZK 找到该 Partition 的 Leader，然后无论该 Topic 的 Partition Factor 为多少，Producer 只将消息发给该 Partition 的 Leader
 
+* [Kafka用Zookeeper所做的那些事](https://www.jianshu.com/p/8f24fb9b7515)
+
 <h3 id="nsq">nsq</h3>
 
 * nsq的三大核心组件
