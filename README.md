@@ -521,6 +521,8 @@
         -reducer "python reduce.py"
     ```
 
+    [mapreduce 多个列做key](http://www.zhangdongshengtech.com/article-detials/240)
+
     设置`stream.num.map.output.key.fields`为2，等于说，value是空，但是在分区的时候，只用key来分区，确保了一致性，设置keycomparator，按照第一列升序，第二列降序来排序，实现既定功能，reduce的时候只需要取出每一年的第一条记录就行
 
 * MapReduce中常见的join方法
