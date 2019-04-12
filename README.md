@@ -182,32 +182,46 @@
 
 	笼统的说，hive中的join可以分为common join(reduce阶段完成join)和map join(map阶段完成join)
 	
-	* map阶段
+	* common join
 	
-		读取源表的数据，map输出时候以join on条件中的列为key，如果Join有多个关联键，则以这些关联键的组合作为key。map输出的value为join之后所关心的(select或者where中需要用到的)列，同时在value中还会包含表的Tag信息，用于标明此value对应哪个表；
+		* map阶段
 		
-	* shuffle阶段
+			读取源表的数据，map输出时候以join on条件中的列为key，如果Join有多个关联键，则以这些关联键的组合作为key。map输出的value为join之后所关心的(select或者where中需要用到的)列，同时在value中还会包含表的Tag信息，用于标明此value对应哪个表；
+			
+		* shuffle阶段
+	
+			根据key的值进行hash,并将key/value按照hash值推送至不同的reduce中，这样确保两个表中相同的key位于同一个reduce中
+			
+		* reduce阶段
+			
+			根据key数值完成join操作，期间通过tag来识别不同表中的数据
+			
+		* 例子
+	
+			```sql
+			SELECT 
+				a.id,
+				a.dept,
+				b.age 
+			FROM
+				a join b 
+			ON
+				a.id = b.id;
+			```
+			
+			![hive-common-join](./imgs/hive-join.png)
+	
+	* map join
 
-		根据key的值进行hash,并将key/value按照hash值推送至不同的reduce中，这样确保两个表中相同的key位于同一个reduce中
+		MapJoin 通常用于一个很小的表和一个大表进行 join 的场景，具体小表有多小，由参数 hive.mapjoin.smalltable.filesize 来决定，该参数表示小表的总大小，默认值为25000000字节，即25M
 		
-	* reduce阶段
+		Hive 0.7之前，需要使用hint提示 `/*+ mapjoin(table) */` 才会执行 MapJoin，否则执行 Common Join，但在0.7版本之后，默认自动会转换 Map Join，由参数 hive.auto.convert.join 来控制，默认为true。仍然以上面的 HQL 来说吧，假设a表为一张大表，b为小表，并且 hive.auto.convert.join=true，那么Hive在执行时候会自动转化 MapJoin
 		
-		根据key数值完成join操作，期间通过tag来识别不同表中的数据
+		![hive-map-join](./imgs/mapjoin.jpg)
 		
-	* 例子
-
-		```sql
-		SELECT 
-			a.id,
-			a.dept,
-			b.age 
-		FROM
-			a join b 
-		ON
-			a.id = b.id;
-		```
-		
-		![hive-join](./imgs/hive-join.png)
+		* 如图中的流程，首先是Task A，它是一个Local Task（在客户端本地执行的Task），负责扫描小表b的数据，将其转换成一个HashTable的数据结构，并写入本地的文件中，之后将该文件加载到DistributeCache中
+		* 接下来是Task B，该任务是一个没有Reduce的MR，启动MapTasks扫描大表a,在Map阶段，根据a的每一条记录去和DistributeCache中b表对应的HashTable关联，并直接输出结果
+		* 由于MapJoin没有Reduce，所以由Map直接输出结果文件，有多少个Map Task，就有多少个结果文件
 
 * hive sql的优化
 
@@ -431,6 +445,10 @@
 * Hive 底层 null 是用 '\N' 存储的
 
 * [Hive array, map, struct 使用](https://blog.csdn.net/u010670689/article/details/72885944)
+
+* 当 Hive map 阶段执行很慢的时候，可以考虑增加 map 的 vcore
+
+* 其实很多时候 hive 的优化可以通过拆分中间表来做，提升会很显著的，复杂的 hive sql 都会变成很多个 stage 的 mr 任务，这时候处理中间数据带来的消耗也是很大的，我自己亲身经历的例子，拆分中间表后，执行时间从 17h -> 2h，cpu 和内存使用数量也是降低了将近 100%
 
 <h3 id="mapreduce">mapreduce</h3>
 
