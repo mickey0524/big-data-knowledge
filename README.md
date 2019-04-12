@@ -450,6 +450,48 @@
 
 * 其实很多时候 hive 的优化可以通过拆分中间表来做，提升会很显著的，复杂的 hive sql 都会变成很多个 stage 的 mr 任务，这时候处理中间数据带来的消耗也是很大的，我自己亲身经历的例子，拆分中间表后，执行时间从 17h -> 2h，cpu 和内存使用数量也是降低了将近 100%
 
+* hive 并行执行 job
+
+	```
+	set hive.exec.parallel=true;   //打开任务并行执行
+	set hive.exec.parallel.thread.number=16; //同一个sql允许最大并行度，默认为8
+	```
+	
+	```
+	from (  
+	select phone,to_phone, substr(to_phone,-1) as key  
+	from youni_contact4_lxw   
+	where youni_id='1'   
+	and length(to_phone) = 11   
+	and  substr(to_phone,1,2) IN ('13','14','15','18')   
+	group by phone,to_phone, substr(to_phone,-1)   
+	) t  
+	insert overwrite table youni_contact41_lxw partition(pt='0')  
+	select phone,to_phone where key='0'  
+	insert overwrite table youni_contact41_lxw partition(pt='1')  
+	select phone,to_phone where key='1'  
+	insert overwrite table youni_contact41_lxw partition(pt='2')  
+	select phone,to_phone where key='2'  
+	insert overwrite table youni_contact41_lxw partition(pt='3')  
+	select phone,to_phone where key='3'  
+	insert overwrite table youni_contact41_lxw partition(pt='4')  
+	select phone,to_phone where key='4'  
+	insert overwrite table youni_contact41_lxw partition(pt='5')  
+	select phone,to_phone where key='5'  
+	insert overwrite table youni_contact41_lxw partition(pt='6')  
+	select phone,to_phone where key='6'  
+	insert overwrite table youni_contact41_lxw partition(pt='7')  
+	select phone,to_phone where key='7'  
+	insert overwrite table youni_contact41_lxw partition(pt='8')  
+	select phone,to_phone where key='8'  
+	insert overwrite table youni_contact41_lxw partition(pt='9')  
+	select phone,to_phone where key='9'; 
+	```
+	
+	该SQL产生11个job，第一个job为生成临时表的job，后续job都依赖它，这时不会有并行启动，
+
+	第一个job完成后，后续的job都会并行启动
+
 <h3 id="mapreduce">mapreduce</h3>
 
 * MapReduce简介
