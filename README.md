@@ -1071,6 +1071,12 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 * [Kafka用Zookeeper所做的那些事](https://www.jianshu.com/p/8f24fb9b7515)
 
+* Kafka 在网络通信性能方面的优化
+
+    * batch 机制(消息 group commit)，Kafka 会把发往相同 broker 上相同 partition 的消息缓存，然后一起发送过去
+
+    * 现在有两个 batch(属于两个partition) 要发往一个 broker，Kafka 会把这两个 batch 合并为一个 request 一起发送
+
 <h3 id="nsq">nsq</h3>
 
 * nsq的三大核心组件
