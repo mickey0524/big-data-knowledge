@@ -1143,3 +1143,6 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 	* body是由N个字节构成的一个消息体，包含了具体的key/value消息
 
 * [Hive 常用函数](https://www.cnblogs.com/MOBIN/p/5618747.html#4)
+
+* [海量数据处理问题知识点复习手册](https://juejin.im/post/5c7d2f036fb9a049d37fd7b6)
+
