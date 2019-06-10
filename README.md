@@ -12,6 +12,7 @@
 * [nsq](#nsq)
 * [flink](#flink)
 * [大数据面试题](#interview)
+* [优秀文章](#article)
 
 <h3 id="hdfs">hdfs</h3>
 
@@ -1151,3 +1152,6 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 * [海量数据处理问题知识点复习手册](https://juejin.im/post/5c7d2f036fb9a049d37fd7b6)
 
+<h3 id="article">优秀文章</h3>
+
+* [Raft一致性算法论文的中文翻译](https://github.com/maemual/raft-zh_cn)
