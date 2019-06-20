@@ -500,6 +500,8 @@
 
 	第一个job完成后，后续的job都会并行启动
 
+* [hive的集合类型Array、Map和Struct及相应的创建、插入、查询操作](https://blog.csdn.net/qq_41973536/article/details/81627918)
+
 <h3 id="mapreduce">mapreduce</h3>
 
 * MapReduce简介
