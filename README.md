@@ -148,6 +148,36 @@
     * Container 容错：如果 ApplicationMaster 在一定的时间内未启动分配的 Container，则 ResourceManager 会将该 Container 状态置为失败并回收它；如果一个 Container 在运行过程中，因为外界原因导致运行失败，则 ResourceManager 会转告给对应的 ApplicationMaster，由它决定如何处理
 
     * ResourceManager 容错：YARN 也是使用主备热切换来实现 ResourceManager 的容错的，YARN 将共享存储系统抽象成 RMStateStore（一个 Java 接口），以保存（出故障后）恢复 RM 所必须的信息：包括 Application 状态信息 ApplicationState、Application 对应的每个 ApplicationAttempt 信息 ApplicationAttemptState 以及安全令牌相关信息 RMDTSecretManagerState，RM 提供了四种 RMStateStore 实现 —— NullRMStateStore（不存储任何状态信息）、MemoryRMStateStore（将状态信息存储到内存中）、FileSystemRMStateStore（将状态信息存储到 HDFS 中）、ZKRMStateStore（将状态信息存储到 Zookeeper 上）。需要注意的是，ResourceManager HA只完成了第一个阶段的设计，即备ResourceManager启动后，会杀死之前正在运行的Application，然后从共享存储系统中读取这些Application的元数据信息，并重新提交这些Application。启动 ApplicationMaster 后，剩下的容错功能就交给 ApplicationMaster 实现了，比如 MapReduce 的 ApplicationMaster 会不断地将完成的任务信息写到 HDFS 上，这样，当它重启时，可以重新读取这些日志，进而只需重新运行那些未完成的任务。ResourceManager HA 第二个阶段的任务是，备 ResourceManager 接管主 ResourceManager 后，无需杀死那些正在运行的 Application，让他们像任何事情没有发生一样运行下去
+
+* YARN 资源调度器基本架构
+
+	![yarn-rs](./imgs/yarn-rs.png)
+
+* YARN 的资源调度模型
+
+	YARN 采用了双层资源调度模型：在第一层中，RM 中的资源管理器将资源分配给各个 ApplicationMaster；在第二层中，ApplicationMaster 再进一步将资源分配给它内部的各个任务。YARN 的资源分配过程是异步的，也就是说，资源调度器将资源分配给一个应用程序后，不会立即 push 给对应的 ApplicationMaster，而是暂时放到一个缓冲区中，等待 ApplicationMaster 通过周期性的心跳来获取，也就是说，YARN 使用的是 pull-based 而不是 push-based
+	
+	* 资源调度器资源分配流程
+	
+		1. NM 通过周期性的心跳汇报节点信息
+		2. RM 为 NM 返回一个心跳应答，包括需要释放的 Container 列表
+		3. RM 触发一个 NODE_UPDATE 事件
+		4. 资源调度器收到 NODE_UPDATE 事件后，会按照一定的策略将该节点上的资源分配给各应用程序
+		5. AM 向 RM 发送周期性的心跳，领取分配的 Container
+		6. RM 返回 Container 列表
+		7. AM 在 Container 上启动 Task
+
+		![rs-process](./imgs/rs-process.png)
+	
+	* 资源分配算法 —— DRF
+
+		DRF（Dominant Resource Fairness），算法伪代码如下：
+		
+		![drf](./imgs/drf.png)
+		
+		简单来说，DRF 首先计算每个任务的主资源，主资源是任务中每个资源占用整体资源比例最大的资源，然后开始循环分配，当资源不够满足的时候 break，DRF 每次循环都会将资源分配给已分配的主资源 / 整体资源比例最小的任务
+		
+		[DRF](http://blog.sina.com.cn/s/blog_768df4d70102vjn2.html)
         
 <h3 id="hive">hive</h3>
 
