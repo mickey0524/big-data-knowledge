@@ -116,6 +116,39 @@
 
 	[容器Cgroup和Namespace特性简介](https://blog.csdn.net/xiangxianghehe/article/details/70569920)
 
+* YARN 的事件处理模型
+
+    ![yarn-event](./imgs/yarn-event-model.png)
+
+    处理请求会作为事件进入系统，由中央异步调度器(Async- Dispatcher)负责传递给相应事件调度器(Event Handler)。该事件调度器可能将该事件转发给 另外一个事件调度器，也可能交给一个带有有限状态机的事件处理器，其处理结果也以事 件的形式输出给中央异步调度器。而新的事件会再次被中央异步调度器转发给下一个事件 调度器，直至处理完成(达到终止条件)
+
+    在 YARN 中，所有核心服务实际上都是一个中央异步调度器，包括 ResourceManager、 NodeManager、MRAppMaster(MapReduce 应 用 程 序 的 ApplicationMaster) 等， 它 们 维 护 了事先注册的事件与事件处理器，并根据接收的事件类型驱动服务的运行
+
+* ResourceManager 的基本功能
+
+    1. 与客户端交互，处理来自客户端的请求，包括提交应用程序、查询应用程序状态和控制应用程序等（比如杀死应用程序）等
+    2. 启动和管理 ApplicationMaster，并在它运行失败时重新启动它
+    3. 管理 NodeManager，接收来自 NodeManager 的资源汇报信息，并向 NodeManager 下达管理指令（比如杀死 Container 等）
+    4. 资源管理和调度，接收来自 ApplicationMaster 的资源申请请求，并为之分配资源
+
+* 脑裂：脑裂是指在主备切换时，由于切换不彻底或其他原因，导致客户端和 Slave 误以为出现了两个 Active Master，最终使得整个集群处于混乱状态。通常采用隔离（Fencing）机制解决脑裂问题，解决脑裂可以从下面三个方向考虑
+
+    1. 共享存储隔离：确保只有一个 Master 往共享存储中写数据
+    2. 客户端隔离：确保只有一个 Master 可以响应客户端的请求
+    3. Slave 隔离：确保只有一个 Master 可以向 Slave 下发命令
+
+    Hadoop 公共库对外提供了两种隔离实现，分别是 sshfence 和 shellfence。其中 sshfence 是指通过 SSH 登录目标 Master 节点上，使用命令 fuser 将进程杀死；shellfence 是指执行一个用户事先定义的 Shell 命令（脚本）完成隔离。
+
+* YARN HA
+
+    * ApplicationMaster 容错：不同的应用程序拥有不同的 ApplicationMaster，而 RM 负责监控 ApplicationMaster 的运行状态，一旦发现它运行失败或者超时，会为其重新分配资源并启动它。至于启动之后 ApplicationMaster 内部的状态如何恢复需要自己保证，比如 MRAppMaster（MapReduce ApplicationMaster）在作业运行过程中将状态信息动态记录到 HDFS 上，一旦出现故障重启之后，它能够从 HDFS 中读取并恢复之前的状态，以减少重新计算带来的开销
+
+    * NodeManager 容错：如果 NodeManager 在一定时间内未向 ResourceManager 汇报心跳消息，则 ResourceManager 认为它已经死掉了，会将它上面所有正在运行的 Container 状态设置为失败，并告诉对应的 ApplicationMaster（如果 AM Container 运行失败，则需要重新分配资源启动 ApplicationMaster），以决定如何处理这些 Container 中运行的任务
+
+    * Container 容错：如果 ApplicationMaster 在一定的时间内未启动分配的 Container，则 ResourceManager 会将该 Container 状态置为失败并回收它；如果一个 Container 在运行过程中，因为外界原因导致运行失败，则 ResourceManager 会转告给对应的 ApplicationMaster，由它决定如何处理
+
+    * ResourceManager 容错：YARN 也是使用主备热切换来实现 ResourceManager 的容错的，YARN 将共享存储系统抽象成 RMStateStore（一个 Java 接口），以保存（出故障后）恢复 RM 所必须的信息：包括 Application 状态信息 ApplicationState、Application 对应的每个 ApplicationAttempt 信息 ApplicationAttemptState 以及安全令牌相关信息 RMDTSecretManagerState，RM 提供了四种 RMStateStore 实现 —— NullRMStateStore（不存储任何状态信息）、MemoryRMStateStore（将状态信息存储到内存中）、FileSystemRMStateStore（将状态信息存储到 HDFS 中）、ZKRMStateStore（将状态信息存储到 Zookeeper 上）。需要注意的是，ResourceManager HA只完成了第一个阶段的设计，即备ResourceManager启动后，会杀死之前正在运行的Application，然后从共享存储系统中读取这些Application的元数据信息，并重新提交这些Application。启动 ApplicationMaster 后，剩下的容错功能就交给 ApplicationMaster 实现了，比如 MapReduce 的 ApplicationMaster 会不断地将完成的任务信息写到 HDFS 上，这样，当它重启时，可以重新读取这些日志，进而只需重新运行那些未完成的任务。ResourceManager HA 第二个阶段的任务是，备 ResourceManager 接管主 ResourceManager 后，无需杀死那些正在运行的 Application，让他们像任何事情没有发生一样运行下去
+        
 <h3 id="hive">hive</h3>
 
 * [数据仓库基本概念](https://www.cnblogs.com/muchen/category/794750.html)
