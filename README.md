@@ -99,8 +99,8 @@
     [YARN的三种调度方法](https://www.cnblogs.com/sodawoods-blogs/p/8877197.html)
 
 	* FIFO
-	* 容器调度器
-	* 公平调度器
+	* 容器调度器(Capacity Scheduler)
+	* 公平调度器(Fair Scheduler)
 
 * YARN 应用运行机制
 
@@ -178,7 +178,30 @@
 		简单来说，DRF 首先计算每个任务的主资源，主资源是任务中每个资源占用整体资源比例最大的资源，然后开始循环分配，当资源不够满足的时候 break，DRF 每次循环都会将资源分配给已分配的主资源 / 整体资源比例最小的任务
 		
 		[DRF](http://blog.sina.com.cn/s/blog_768df4d70102vjn2.html)
+
+* YARN 的资源抢占模型
+
+    1. SchedulingEditPolicy 探测到需要抢占的资源，将需要抢占的资源通过事件 DROP\_RESERVATION 和 PREEMPT\_CONTAINER 发送给 ResourceManager
+    2. RM 调用相应的 EventHanler 标注待抢占的 Container
+    3. RM 收到来自 ApplicationMaster 的心跳信息，并通过心跳应答将待释放的资源总量和待抢占 Container 列表返回给它
+    4. SchedulingEditPolicy 探测到一段时间内，ApplicationMaster 没有自行杀死约定的 Container，则将这些 Container 封装到 KILL\_CONTAINER 的 killContainer 函数
+    5. RM 会将杀死的 Container 列表通过心跳包应答返回给 NM
+    6. NM 杀死，通过心跳包返回给 RM，RM 再通过心跳包发送给 ApplicationMaster
+    
+    ![resource-grab](./imgs/resource-grab.png)
+
+* YARN 默认的资源抢占算法
+
+    ![grab-algo](./imgs/grab-algo.png)
+
+    核心思想是 YARN 会为每个队列设置最小资源，然后将所有的最小资源加起来，得到 minResourceSum，再将每个队列的最小资源 / minResourceSum，得到一个比例，这个比例 * 当前待分配的资源 = 本次循环，YARN 给予这个队列的资源，如果队列不使用，也就是 wQdone = 0，资源就会被分配给其他队列，其实就是根据 current + pending 来计算的，当 pending 的任务多了，就会试图从其他队列中抢占资源
         
+* 容量调度器和公平调度器的比较
+
+    ![scheduler-diff](./imgs/scheduler-diff.png)
+
+    公平调度：按照内存资源使用量比率调度，即按照 used_memory/minShare 大小调度
+
 <h3 id="hive">hive</h3>
 
 * [数据仓库基本概念](https://www.cnblogs.com/muchen/category/794750.html)
