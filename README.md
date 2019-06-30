@@ -115,6 +115,8 @@
 * cgroup 和 namespace
 
 	[容器Cgroup和Namespace特性简介](https://blog.csdn.net/xiangxianghehe/article/details/70569920)
+	
+	[Linux的Namespace与Cgroups介绍](https://blog.csdn.net/weixin_34138377/article/details/86024583)
 
 * YARN 的事件处理模型
 
@@ -201,6 +203,16 @@
     ![scheduler-diff](./imgs/scheduler-diff.png)
 
     公平调度：按照内存资源使用量比率调度，即按照 used_memory/minShare 大小调度
+    
+* YARN 的资源隔离
+
+	YARN 对内存资源和 CPU 资源采用了不同的资源隔离方案。对于内存资源，它是一种限制性资源，它的量的大小直接决定的应用程序的死活
+	
+	YARN 采用线程监控的方案控制内存使用，每个 NM 会启动一个额外监控线程监控每个 Container 内存资源使用量，一旦发现它超过约定的资源量，则将其杀死，采用这种机制的另外一个原因是 Java 中创建子进程采用了 "fork() + exec()" 的方案，子进程启动瞬间，它使用的内存量与父进程一致，这样从外面来看，一个进程使用的内存量可能瞬间翻倍，然后又降低下来，采用线程监控的方案可以防止这种情况下导致的 swap 操作
+	
+	CPU 资源，是一种弹性资源，它的量的大小不会直接影响到应用程序的死活，因此采用了 Cgroups
+	
+	YARN 使用了 Cgroups 中的 CPU 和 Memory 子系统，CPU 子系统用于控制 Cgroups 中所有进程可以使用的 CPU 时间片。用户可根据需要修改 Cgroups 目录下的 cpu.shares 文件配置进程的 CPU 使用份额，而 CPU 子系统能够根据写入的整数值控制该进程获得的时间片，CPU 子系统是通过 Linux CFS 调度器实现的，在 "完全理想的多任务处理器" 下，CFS 能够使得每个进程都能同时获得 CPU 的执行时间。当系统中有两个进程的时候，CPU 的计算时间被分为两份，每个进程获得 50%。然而在实际的硬件上，当一个进程占用 CPU 时，其他进程就必须等待。所以 CFS 将惩罚当前进程，使其他进程能够在下次调度的时候尽可能的取代当前进程，最终实现所有进程的公平调度
 
 <h3 id="hive">hive</h3>
 
