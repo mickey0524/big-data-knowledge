@@ -493,6 +493,8 @@
 
     [Hive--行转列（Lateral View explode()）和列转行（collect_set() 去重）](http://www.voidcn.com/article/p-kvqbqneb-bbk.html)
     
+    explode 这个 UDTF 会生成一个虚表，需要和 lateral view 一同使用，`lateral view explode (expression) table as col`
+
     * 行转列
 
         ```
@@ -502,7 +504,7 @@
             name
         from
             game.game_test
-        lateral view explode(split(col3, ',')) col3 as name
+        lateral view explode(split(col3, ',')) t as name
         ```
     
     * 列转行
