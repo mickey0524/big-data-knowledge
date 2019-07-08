@@ -331,7 +331,9 @@
 
 * hive sql的优化
 
-	[Hive SQL的优化](http://lxw1234.com/archives/2015/06/317.htm)
+    * [Hive SQL的优化](http://lxw1234.com/archives/2015/06/317.htm)
+    * [hive优化之——控制hive任务中的map数和reduce数](http://lxw1234.com/archives/2015/04/15.htm)
+    * [yarn mapreduce或者hive参数最佳实践](https://blog.csdn.net/T1DMzks/article/details/80204420)
 
 * hive函数总结
 
@@ -362,7 +364,7 @@
 	```
 	create table if not exists...
 	
-	sotred as orc/parquet
+	store as orc/parquet
 	```
 
 * hive可以通过load local data将本地文件load到hdfs上，但是parquet的文件不能这样，需要先用pandas的df.to\_parquet()，才可以推上去(该方法新增于0.21.0版本)
