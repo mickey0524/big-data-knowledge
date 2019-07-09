@@ -1001,6 +1001,18 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
     * 通过RDDs之间的转换构建DAG，中间结果不用落地
     * RDD支持缓存，可以在内存中快速完成计算
 
+* 一个Spark应用程序包括Job、Stage以及Task三个概念
+
+	1. Job 是以 Action 方法为界，遇到一个 Action 方法则触发一个 Job
+	2. Stage 是 Job 的子集，以 RDD 宽依赖（即 Shuffle）为界，遇到 Shuffle 做一次划分
+	3. Task 是 Stage 的子集，以并行度（分区数）来衡量，分区数是多少，则有多少个 Task
+
+* Spark 的 Driver 在初始化 SparkContext 的过程中，会分别初始化 DAGScheduler、TaskScheduler、SchedulerBackend 以及 HeartbeatReceiver，并启动 SchedulerBackend 以及 HeartbeatReceiver。SchedulerBackend 通过 ApplicationMaster 申请资源，并不断从 TaskScheduler 中拿到合适的 Task 分发到 Executor 执行。HeartbeatReceiver 负责接收 Executor 的心跳信息，监控 Executor 的存活状况，并通知到 TaskScheduler
+
+* DAGScheduler 会将 Stage 打包到 TaskSet 交给 TaskScheduler，TaskScheduler 会将其封装为 TaskSetManager 加入调度队列中，TaskSetManager 负责监控管理同一个 Stage 中的 Tasks，TaskScheduler 就是以 TaskSetManager 为单元来调度任务的
+
+* TaskScheduler 的调度方法有 FIFO 和 Fair 两种，可以在 SparkConf 中设置 `spark.scheduler.mode = FAIR` 来使用公平模式
+
 <h3 id="hbase">hbase</h3>
 
 * hbase是一个在HDFS上开发的面向列的分布式数据库，如果需要实时地随机访问超大规模数据集，就可以使用HBase这一Hadoop应用
