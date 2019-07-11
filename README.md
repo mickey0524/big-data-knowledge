@@ -1287,6 +1287,12 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
     9. 我们将 `doc_id page_link` `term term_id` `term_id offset` 加载到内存，然后对用户的输入进行分词，得到词缀集合，然后从 `term term_id` 中获取 term\_id，然后从 `term_id offset` 中获取 offset，拿着 offset 去倒排索引中获取 doc\_id 的集合，最后从 `doc_id page_link` 中获取 page\_link
     10. 这里可以对 page\_link 做一个简单的计数排序，返回
 
+* 给定 n 个实数，求这 n 个实数在实轴上两数之间间距的最大值，要求线性的时间算法
+
+    1. 找到 n 个数据中最大和最小数据 max 和 min
+    2. 用 n - 2 个点等分区间 [min, max]，即将 [min, max] 等分为 n - 1 个区间（前闭后开区间），将这些区间看作桶，且桶 i 的上界和桶 i + 1 的下届相同，即每个桶的大小相同，且认为将 min 放入第一个桶，将 max 放入第 n - 1 个桶
+    3. 除最大最小数据 max 和 min 以外的 n - 2 个数据放入 n - 1 个桶中，由抽屉原理可知至少有一个桶是空的，因此最大间隙中间肯定隔了一个空桶，遍历比对即可
+
 <h3 id="article">优秀文章</h3>
 
 * [Raft一致性算法论文的中文翻译](https://github.com/maemual/raft-zh_cn)
