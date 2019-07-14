@@ -65,6 +65,8 @@
 
 	Federation即为“联邦”，该特性允许一个HDFS集群中存在多个NameNode同时对外提供服务，这些NameNode分管一部分目录（水平切分），彼此之间相互隔离，但共享底层的DataNode存储资源
 
+    联盟模式需要各个独立的集群自行进行数据共享，可以在整体 HDFS 服务上设置一个 Proxy 的代理层，存储 HDFS 路径与集群的映射，进而与对应的 NameNode 通信，同时在 Proxy 上，还可以做限流，资源限制，metric 等    
+
 * [Hadoop NameNode 高可用 (High Availability) 实现解析](https://www.ibm.com/developerworks/cn/opensource/os-cn-hadoop-name-node/index.html)
 
 <h3 id="yarn">yarn</h3>
