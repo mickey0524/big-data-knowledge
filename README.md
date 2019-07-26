@@ -1022,6 +1022,8 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 * TaskScheduler 的调度方法有 FIFO 和 Fair 两种，可以在 SparkConf 中设置 `spark.scheduler.mode = FAIR` 来使用公平模式
 
+* [Spark 容错](https://blog.csdn.net/WYpersist/article/details/79774463)
+
 <h3 id="hbase">hbase</h3>
 
 * hbase是一个在HDFS上开发的面向列的分布式数据库，如果需要实时地随机访问超大规模数据集，就可以使用HBase这一Hadoop应用
