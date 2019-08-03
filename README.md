@@ -1020,9 +1020,13 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 * DAGScheduler 会将 Stage 打包到 TaskSet 交给 TaskScheduler，TaskScheduler 会将其封装为 TaskSetManager 加入调度队列中，TaskSetManager 负责监控管理同一个 Stage 中的 Tasks，TaskScheduler 就是以 TaskSetManager 为单元来调度任务的
 
+* [Spark Scheduler内部原理剖析](http://sharkdtu.com/posts/spark-scheduler.html)
+
 * TaskScheduler 的调度方法有 FIFO 和 Fair 两种，可以在 SparkConf 中设置 `spark.scheduler.mode = FAIR` 来使用公平模式
 
 * [Spark 容错](https://blog.csdn.net/WYpersist/article/details/79774463)
+
+* [Spark 调度模式（FIFO/FAIR）](https://www.jianshu.com/p/61c967450062)
 
 <h3 id="hbase">hbase</h3>
 
