@@ -1028,6 +1028,8 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 * [Spark 调度模式（FIFO/FAIR）](https://www.jianshu.com/p/61c967450062)
 
+* [spark消费kafka的两种方式](https://blog.csdn.net/woloqun/article/details/80635304)
+
 <h3 id="hbase">hbase</h3>
 
 * hbase是一个在HDFS上开发的面向列的分布式数据库，如果需要实时地随机访问超大规模数据集，就可以使用HBase这一Hadoop应用
