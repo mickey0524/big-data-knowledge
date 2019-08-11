@@ -220,6 +220,8 @@
 
 <h3 id="hive">hive</h3>
 
+* [hive基本结构与数据存储](https://www.cnblogs.com/pejsidney/p/8953402.html)
+
 * [数据仓库基本概念](https://www.cnblogs.com/muchen/category/794750.html)
 
 * 数据仓库(DW/Data Warehouse)分层原则(每家公司都有自己的规范)
@@ -1229,6 +1231,26 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
     对于消费者：采用exactly-once语义，消息消费结果保存与手动提交偏移量做成一个事务，比如一条sql语句既保存结果也保存偏移量，要么一起成功，要么一起失败；也可以根据数据唯一字段进行重复判断
 
 * [Kafka 时间轮](https://blog.csdn.net/ddxygq/article/details/88429646)
+
+* Kafka 零拷贝技术
+
+    Kafka 之所以快其中一个很重要的原因就是使用了零拷贝技术
+
+    * 传统的文件拷贝
+
+        需要从用户态转到内核态，经过 read buffer，然后再返回到用户态的应用层 buffer，然后再从用户态把数据拷贝到核心态的 socket buffer
+
+    * 更好一些的文件拷贝
+
+        我们不用将数据从内核态拷贝到用户态，再拷贝回内核态，直接在内核态的两个 buffer 之间拷贝完事了（read buffer -> socket buffer）
+
+    * 最好的文件拷贝
+        
+        进一步减少数据复制的次数，借助 DMA （Direct Memory Access，一种可让某些硬件子系统去直接访问系统主内存，而不用依赖CPU的计算机系统的功能。听着是不是很厉害，跳过CPU，直接访问主内存。传统的内存访问都需要通过CPU的调度来完成）
+
+        回到文件传输，有了DMA后，就可以实现绝对的零拷贝了，因为网卡是直接去访问系统主内存的
+
+        Java 中的 FileChannel 实现了零拷贝，FileChannel 中有一个 transferTo 方法，底层使用了 sendfile 这个 System call，将数据从一个 fd 拷贝到另外一个 fd
 
 <h3 id="nsq">nsq</h3>
 
