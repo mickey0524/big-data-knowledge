@@ -1034,6 +1034,8 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 * [Spark Streaming对Exactly Once的实现原理](https://blog.csdn.net/cymvp/article/details/52605987)
 
+* [Spark内存管理详解](https://www.cnblogs.com/wzj4858/p/8204282.html)
+
 <h3 id="hbase">hbase</h3>
 
 * hbase是一个在HDFS上开发的面向列的分布式数据库，如果需要实时地随机访问超大规模数据集，就可以使用HBase这一Hadoop应用
