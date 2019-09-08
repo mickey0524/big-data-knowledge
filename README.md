@@ -1056,6 +1056,8 @@ BloomFilter最常见的作用是：判断某个元素是否在一个集合里面
 
 * [HBase–RegionServer宕机恢复原理](https://zhuanlan.zhihu.com/p/28475168)
 
+* [HBase Region 自动拆分策略](jianshu.com/p/bc0946a96a40)
+
 <h3 id="zk">zookeeper</h3>
 
 * [ZooKeeper简介](https://juejin.im/post/5b970f1c5188255c865e00e7?utm_source=gold_browser_extension)
