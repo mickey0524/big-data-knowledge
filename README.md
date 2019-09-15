@@ -84,6 +84,18 @@
 		* Spark
 		* Flink
 
+* Hadoop1.x 的缺点
+
+    1. JobTracker 存在单点故障的隐患
+    2. 任务调度和资源管理全部是 JobTracker 来完成，单点负担过重
+    3. TaskTracker 分 Map Slot 和 Reduce Slot, 如果任务只需要 map 任务可能会造成资源浪费
+
+* Hadoop2.x 与 Hadoop1.x 的区别
+
+    1. 资源调度方式的改变：在1.x, 使用Jobtracker负责任务调度和资源管理,单点负担过重,在2.x中,新增了yarn作为集群的调度工具.在yarn中,使用ResourceManager进行 资源管理, 单独开启一个Container作为ApplicationMaster来进行任务管理
+    2. HA模式：在1.x中没有HA模式,集群中只有一个NameNode,而在2.x中可以启用HA模式,存在一个Active NameNode 和Standby NameNode
+    3. HDFS Federation：Hadoop 2.0中对HDFS进行了改进，使NameNode可以横向扩展成多个，每个NameNode分管一部分目录，进而产生了HDFS Federation，该机制的引入不仅增强了HDFS的扩展性，也使HDFS具备了隔离性   
+
 * YARN是hadoop的集群资源管理系统，YARN被引入Hadoop 2，最初是为了改善MapReduce的实现，但它具有足够的通用性，也可以用于其他的分布式计算模式，例如Spark，那么MapReduce1和YARN的区别是啥呢？
 
     MapReduce1中，有两类守护进程控制者作业的执行过程：一个`jobtracker`及一个或多个`tasktracker`。jobtracker通过调度tasktracker上运行的任务来协调所有运行在系统上的作业。tasktracker在运行任务的同时将运行进度报告发送给jobtracker，jobtracker由此记录每项作业任务的整体进度情况。如果其中一个任务失败，jobtracker可以在另一个tasktracker节点上重新调度该任务。
@@ -408,7 +420,7 @@
     select col2;
     ```
 
-* hive中使用order by的时候会对数据进行全排列，同时只会使用一个reducer worker，我们可以用sort by和distribute by来进行代替，因为这个时候我们可以手动设置多个reducer worker，方法如下：
+* hive中使用order by的时候会对数据进行全排列，同时只会使用一个reducer worker，我们可以用sort by和distribute by来进行代替，因为这个时候我们可以手动设置多个reducer worker，这样可以对输出的数据执行归并排序，方法如下：
 
     ```
     set mapred.reduce.tasks=2;
